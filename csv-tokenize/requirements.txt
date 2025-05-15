@@ -1,0 +1,4 @@
+pandas
+boto3
+jpype1
+konlpy

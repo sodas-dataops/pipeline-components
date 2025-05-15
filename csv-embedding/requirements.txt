@@ -1,0 +1,7 @@
+# 경량화 requirements.txt (모델을 직접 불러올 경우)
+pandas
+boto3
+torch==2.1.0+cpu
+transformers==4.36.2
+scikit-learn
+numpy<2.0
