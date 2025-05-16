@@ -101,7 +101,7 @@ def solution(data: object, output_filename: str, input_cols, display_mode='repla
     print(f"- 기존 컬럼: {', '.join(df.columns)}")
     
     # 입력 파일 크기 확인
-    input_size = os.path.getsize(data.name if hasattr(data, 'name') else data)
+    input_size = len(data.getvalue().encode('utf-8'))
     print(f"- 입력 파일 크기: {input_size / 1024:.2f} KB")
     
     # 입력 컬럼 검증

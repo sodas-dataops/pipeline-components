@@ -67,29 +67,7 @@ def generate_report(
     - output_column: 생성할 새로운 컬럼명.
     - output_csv_path: 저장할 CSV 파일 경로.
     """
-    try:
-        # CSV 데이터 로드
-        df = pd.read_csv(input_data)
-
-        try:
-            transform_function = eval(transform_function_str)
-            if not callable(transform_function):
-                raise ValueError(f"The provided lambda function is not callable: {transform_function_str}")
-        except Exception as e:
-            raise ValueError(f"Failed to parse lambda function: {e}")
-        
-        # 대상 컬럼을 문자열로 변환
-        df[target_column] = df[target_column].fillna('').astype(str)
-
-        # 람다 함수 적용
-        df[output_column] = df[target_column].apply(transform_function)
-
-        # 결과 저장
-        df.to_csv(output_csv_path, index=False)
-        print(f"Lambda function applied and data saved to {output_csv_path}")
-    except Exception as e:
-        print(f"Failed to process CSV data: {e}")
-        raise
+    return report
 
 def solution(input_data: StringIO, target_column: str, transform_function_str: str, output_column: str, output_csv_path: str) -> tuple:
     """

@@ -27,6 +27,16 @@ def generate_report(
     total_input_rows = sum(len(df) for df in input_dfs)
     total_input_columns = max(len(df.columns) for df in input_dfs)
     common_columns = set.intersection(*[set(df.columns) for df in input_dfs])
+
+    details = []
+    for i, df in enumerate(input_dfs):
+        details.append(
+            f"#### 파일 {i+1}: {input_filenames[i]}\n"
+            f"- 행 수: {len(df):,}행\n"
+            f"- 컬럼 수: {len(df.columns)}개\n"
+            f"- 컬럼 목록: {', '.join(df.columns)}"
+        )
+    input_details = "\n".join(details)
     
     report = f"""# CSV 병합 작업 보고서
 
@@ -43,7 +53,7 @@ def generate_report(
 - **공통 컬럼 목록**: {', '.join(common_columns)}
 
 ### 입력 파일 상세 정보
-{chr(10).join([f"#### 파일 {i+1}: {input_filenames[i]}\n- 행 수: {len(df):,}행\n- 컬럼 수: {len(df.columns)}개\n- 컬럼 목록: {', '.join(df.columns)}" for i, df in enumerate(input_dfs)])}
+{input_details}
 
 ## 3. 처리 결과
 - **출력 파일**: {output_filename}

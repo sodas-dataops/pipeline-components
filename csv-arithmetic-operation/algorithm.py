@@ -88,7 +88,7 @@ def solution(data: object, output_filename: str, operands, operators, column_nam
     print(f"- 기존 컬럼: {', '.join(df.columns)}")
     
     # 입력 파일 크기 확인
-    input_size = os.path.getsize(data.name if hasattr(data, 'name') else data)
+    input_size = len(data.getvalue().encode('utf-8'))
     print(f"- 입력 파일 크기: {input_size / 1024:.2f} KB")
     
     # 피연산자와 연산자의 개수가 유효한지 검사
