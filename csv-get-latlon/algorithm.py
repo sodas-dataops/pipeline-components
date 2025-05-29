@@ -11,9 +11,6 @@ from datetime import datetime
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 API_KEYS = [
-    "71EB80C0-C5D7-3AE2-BF88-11E144C33D04",
-    "BB583936-81AE-3364-A989-41109E1128F8",
-    "13646E86-9FC2-34B2-8499-E0DDC0E91DD9"
 ]
 
 def generate_report(
