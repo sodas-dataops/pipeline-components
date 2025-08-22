@@ -144,9 +144,9 @@ def solution(settings, kubeconfig_path, upload_callback=None):
     Kubernetes 로그를 수집하고 저장하는 함수.
 
     Parameters:
-    - settings: 설정 정보 (dict)
-    - kubeconfig_path: kubeconfig 파일 경로 (str)
-    - upload_callback: 로그 파일 업로드 콜백 함수 (함수, 기본값: None)
+    - settings (dict): 설정 정보
+    - kubeconfig_path (str): kubeconfig 파일 경로
+    - upload_callback (function): 로그 파일 업로드 콜백 함수 (기본값: None)
 
     Returns:
     - tuple: (저장된 파일 경로 리스트, 보고서 내용)

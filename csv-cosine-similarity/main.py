@@ -70,11 +70,11 @@ if __name__ == '__main__' :
 
     # 코사인 유사도 계산 및 결과 저장
     results, report_content = algorithm.solution(
-        query_local, 
-        candidate_local, 
-        result_path, 
-        args['settings']['top_n'], 
-        args['settings']['threshold']
+        query_npz=query_local, 
+        candidate_npz=candidate_local, 
+        output_filename=result_path, 
+        top_n=args['settings']['top_n'], 
+        threshold=args['settings']['threshold']
     )
     
     # 보고서 저장

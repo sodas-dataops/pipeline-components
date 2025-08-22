@@ -103,12 +103,12 @@ def solution(data: object, group_by_column: str, value_column: str, image_file_n
     CSV 파일에서 그룹화된 데이터의 박스 플롯을 생성하여 이미지 파일로 저장하는 함수.
 
     Parameters:
-    - data: CSV 파일 경로 또는 Pandas DataFrame 객체
-    - group_by_column: 그룹화 기준 컬럼명
-    - value_column: 박스 플롯에 사용할 값 컬럼명
-    - image_file_name: 저장할 이미지 파일 이름
-    - title: 그래프 제목 (선택사항)
-    - ylabel: y축 레이블 (선택사항, 기본값 'Values')
+    - data (object): CSV 파일 경로 또는 Pandas DataFrame 객체
+    - group_by_column (str): 그룹화 기준 컬럼명
+    - value_column (str): 박스 플롯에 사용할 값 컬럼명
+    - image_file_name (str): 저장할 이미지 파일 이름
+    - title (str): 그래프 제목 (선택사항)
+    - ylabel (str): y축 레이블 (선택사항, 기본값 'Values')
     
     Returns:
     - tuple: (이미지 파일 경로, 보고서 내용)
