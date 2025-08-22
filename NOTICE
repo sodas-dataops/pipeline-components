@@ -1,0 +1,224 @@
+# NOTICE
+
+## 📢 중요 공지사항
+
+### 라이선스 정보
+이 프로젝트는 **GNU General Public License v3.0** 하에 배포됩니다.
+상업적 사용을 원하시는 경우 ETRI와 별도 라이선스 계약이 필요합니다.
+
+### 버전 정보
+- **현재 버전**: 1.0.0
+- **최종 업데이트**: 2024년
+- **지원 기간**: 2024년 ~ 2026년
+
+## 🔗 외부 리소스 정보
+
+### 사용된 오픈소스 라이브러리
+
+#### 데이터 처리
+- **pandas** (BSD 3-Clause License)
+  - 버전: 2.0.0+
+  - 용도: 데이터 분석 및 조작
+  - 출처: https://pandas.pydata.org/
+
+- **numpy** (BSD 3-Clause License)
+  - 버전: 1.24.0+
+  - 용도: 수치 계산
+  - 출처: https://numpy.org/
+
+#### 데이터베이스 연결
+- **psycopg2-binary** (LGPL License)
+  - 버전: 2.9.0+
+  - 용도: PostgreSQL 연결
+  - 출처: https://www.psycopg.org/
+
+- **pymysql** (MIT License)
+  - 버전: 1.0.0+
+  - 용도: MySQL 연결
+  - 출처: https://pymysql.readthedocs.io/
+
+- **pymongo** (Apache License 2.0)
+  - 버전: 4.0.0+
+  - 용도: MongoDB 연결
+  - 출처: https://pymongo.readthedocs.io/
+
+#### 시각화
+- **matplotlib** (PSF License)
+  - 버전: 3.7.0+
+  - 용도: 그래프 생성
+  - 출처: https://matplotlib.org/
+
+- **seaborn** (BSD 3-Clause License)
+  - 버전: 0.12.0+
+  - 용도: 통계 시각화
+  - 출처: https://seaborn.pydata.org/
+
+- **plotly** (MIT License)
+  - 버전: 5.0.0+
+  - 용도: 인터랙티브 시각화
+  - 출처: https://plotly.com/
+
+#### 클라우드 및 컨테이너
+- **boto3** (Apache License 2.0)
+  - 버전: 1.26.0+
+  - 용도: AWS S3 연동
+  - 출처: https://boto3.amazonaws.com/
+
+- **kubernetes** (Apache License 2.0)
+  - 버전: 26.0.0+
+  - 용도: Kubernetes API 연동
+  - 출처: https://kubernetes.io/
+
+#### 통신 및 메시징
+- **paho-mqtt** (Eclipse Public License 1.0)
+  - 버전: 1.6.0+
+  - 용도: MQTT 클라이언트
+  - 출처: https://www.eclipse.org/paho/
+
+#### 유틸리티
+- **tabulate** (MIT License)
+  - 버전: 0.9.0+
+  - 용도: 테이블 포맷팅
+  - 출처: https://pypi.org/project/tabulate/
+
+- **psutil** (BSD 3-Clause License)
+  - 버전: 5.9.0+
+  - 용도: 시스템 모니터링
+  - 출처: https://psutil.readthedocs.io/
+
+### 라이선스 요약
+
+| 라이브러리 | 라이선스 | 호환성 |
+|-----------|---------|--------|
+| pandas | BSD 3-Clause | ✅ 호환 |
+| numpy | BSD 3-Clause | ✅ 호환 |
+| psycopg2-binary | LGPL | ✅ 호환 |
+| pymysql | MIT | ✅ 호환 |
+| pymongo | Apache 2.0 | ✅ 호환 |
+| matplotlib | PSF | ✅ 호환 |
+| seaborn | BSD 3-Clause | ✅ 호환 |
+| plotly | MIT | ✅ 호환 |
+| boto3 | Apache 2.0 | ✅ 호환 |
+| kubernetes | Apache 2.0 | ✅ 호환 |
+| paho-mqtt | EPL 1.0 | ✅ 호환 |
+| tabulate | MIT | ✅ 호환 |
+| psutil | BSD 3-Clause | ✅ 호환 |
+
+## ⚠️ 주의사항
+
+### 보안 관련
+- **민감한 정보**: 설정 파일에 데이터베이스 비밀번호, API 키 등 민감한 정보를 직접 입력하지 마세요.
+- **환경 변수**: 프로덕션 환경에서는 환경 변수를 통해 민감한 정보를 전달하세요.
+- **네트워크 보안**: 방화벽 설정을 통해 필요한 포트만 개방하세요.
+
+### 성능 관련
+- **메모리 사용량**: 대용량 데이터 처리 시 메모리 사용량을 모니터링하세요.
+- **청킹 처리**: 대용량 파일은 청킹 방식으로 처리하는 것을 권장합니다.
+- **병렬 처리**: 가능한 경우 멀티프로세싱을 활용하세요.
+
+### 호환성 관련
+- **Python 버전**: Python 3.10 이상을 권장합니다.
+- **운영체제**: Linux, macOS, Windows에서 테스트되었습니다.
+- **Docker**: Docker 20.0 이상을 권장합니다.
+
+## 🆘 문제 해결
+
+### 자주 발생하는 문제
+
+#### 1. 메모리 부족 (OOM Killed)
+```
+해결 방법:
+- chunksize 값을 줄이세요 (기본값: 1000 → 100)
+- Docker 컨테이너의 메모리 제한을 늘리세요
+- gc.collect()를 주기적으로 호출하세요
+```
+
+#### 2. 데이터베이스 연결 실패
+```
+해결 방법:
+- 네트워크 연결 상태를 확인하세요
+- 방화벽 설정을 확인하세요
+- 데이터베이스 서버 상태를 확인하세요
+- SSL 인증서 설정을 확인하세요
+```
+
+#### 3. Object Storage 업로드 실패
+```
+해결 방법:
+- 접근 키와 시크릿 키를 확인하세요
+- 버킷 권한을 확인하세요
+- 네트워크 연결을 확인하세요
+- 파일 크기 제한을 확인하세요
+```
+
+### 로그 확인 방법
+
+```bash
+# Docker 로그 확인
+docker logs <container_name>
+
+# Kubernetes 로그 확인
+kubectl logs <pod_name>
+
+# 로컬 실행 시 로그 확인
+python main.py 2>&1 | tee log.txt
+```
+
+## 📞 지원 및 문의
+
+### 기술 지원
+- **이메일**: siwoonson@etri.re.kr
+- **이슈 트래커**: GitHub Issues
+- **문서**: GitHub Wiki
+
+### 상업적 지원
+상업적 사용을 원하시는 경우:
+- **라이선스 계약**: ETRI 기술이전팀
+- **기술 지원**: ETRI CybreBrain Section
+- **컨설팅**: 별도 계약 필요
+
+### 커뮤니티 지원
+- **GitHub Discussions**: 일반적인 토론
+- **Stack Overflow**: 기술적 질문
+- **Slack**: 실시간 채팅 (선택사항)
+
+## 📋 체크리스트
+
+### 배포 전 체크리스트
+- [ ] 모든 테스트 통과
+- [ ] 문서 업데이트 완료
+- [ ] 라이선스 정보 확인
+- [ ] 보안 취약점 검사
+- [ ] 성능 테스트 완료
+- [ ] 호환성 테스트 완료
+
+### 사용 전 체크리스트
+- [ ] 시스템 요구사항 확인
+- [ ] 의존성 설치 완료
+- [ ] 설정 파일 구성 완료
+- [ ] 네트워크 연결 확인
+- [ ] 권한 설정 확인
+- [ ] 백업 전략 수립
+
+## 🔄 업데이트 정보
+
+### 버전 히스토리
+- **v1.0.0** (2024년): 초기 릴리즈
+  - 기본 컴포넌트 40개 구현
+  - Docker 컨테이너 지원
+  - Kubernetes 연동 지원
+  - Object Storage 연동 지원
+
+### 향후 계획
+- **v1.1.0**: 성능 최적화 및 버그 수정
+- **v1.2.0**: 새로운 컴포넌트 추가
+- **v2.0.0**: 아키텍처 개선 및 확장성 향상
+
+---
+
+**SODASops** - 데이터 파이프라인 컴포넌트 컬렉션
+
+*더 나은 데이터 처리 경험을 제공합니다.*
+
+Copyright (C) 2024 Electronics and Telecommunications Research Institute (ETRI)
+All rights reserved. 

@@ -1,0 +1,37 @@
+# SODASops: Containerized Pipeline Components
+
+## 저작자 정보
+
+### 개발팀
+**ETRI CybreBrain Section**  
+한국전자통신연구원 사이버브레인연구실
+
+### 담당자
+**Siwoon Son (손시운)**  
+- **직책**: 연구원
+- **소속**: ETRI CybreBrain Section
+- **이메일**: siwoonson@etri.re.kr
+- **주소**: 대전광역시 유성구 가정로 218 한국전자통신연구원
+
+### 프로젝트 정보
+- **프로젝트명**: SODASops: Containerized Pipeline Components
+- **버전**: 1.0.0
+- **개발 기간**: 2024년
+- **라이선스**: GNU General Public License v3.0
+
+### 기여자
+- **주요 개발자**: Siwoon Son
+- **기술 검토**: ETRI CybreBrain Section
+- **문서화**: Siwoon Son
+
+### 연락처
+- **기술 문의**: siwoonson@etri.re.kr
+- **이슈 리포트**: GitHub Issues
+- **문서**: GitHub Wiki
+
+### 저작권
+Copyright (C) 2024 Electronics and Telecommunications Research Institute (ETRI)
+All rights reserved.
+
+이 프로젝트는 GNU General Public License v3.0 하에 배포됩니다.
+자세한 내용은 LICENSE 파일을 참조하세요. 

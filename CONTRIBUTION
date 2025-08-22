@@ -1,0 +1,358 @@
+# 기여 가이드 (Contribution Guide)
+
+SODASops 프로젝트에 기여해주셔서 감사합니다! 이 문서는 프로젝트에 기여하는 방법과 절차를 안내합니다.
+
+## 목차
+
+- [기여 방법](#기여-방법)
+- [개발 환경 설정](#개발-환경-설정)
+- [코딩 스타일](#코딩-스타일)
+- [커밋 메시지 규칙](#커밋-메시지-규칙)
+- [Pull Request 절차](#pull-request-절차)
+- [이슈 리포트](#이슈-리포트)
+- [문서화](#문서화)
+- [테스트](#테스트)
+- [커뮤니케이션](#커뮤니케이션)
+
+## 기여 방법
+
+### 기여할 수 있는 영역
+
+- **소스코드 개선**: 버그 수정, 성능 최적화, 새로운 기능 추가
+- **문서 개선**: README, API 문서, 사용자 가이드 업데이트
+- **테스트 코드**: 단위 테스트, 통합 테스트 추가
+- **번역**: 한국어/영어 문서 번역
+- **디자인**: UI/UX 개선, 아이콘, 로고 디자인
+- **이슈 관리**: 버그 리포트, 기능 요청, 이슈 정리
+- **코드 리뷰**: 다른 기여자의 코드 검토 및 피드백
+
+### 기여 절차
+
+1. **Fork** 저장소
+2. **Feature branch** 생성
+3. **개발 및 테스트** 수행
+4. **커밋** 작성
+5. **Push** 브랜치
+6. **Pull Request** 생성
+7. **코드 리뷰** 및 피드백
+8. **병합** 및 배포
+
+## 개발 환경 설정
+
+### 전제조건
+
+- Python 3.10+
+- Docker
+- Git
+- IDE (VS Code, PyCharm 등)
+
+### 로컬 개발 환경 설정
+
+```bash
+# 1. 저장소 클론
+git clone https://github.com/sodas-dataops/pipeline-components.git
+cd pipeline-components
+
+# 2. 가상환경 생성
+cd csv-sort
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# 또는 .venv\Scripts\activate  # Windows
+
+# 3. 의존성 설치
+pip install -r requirements.txt
+
+# 4. 개발 도구 설치
+pip install black flake8 pytest mypy
+
+# 5. Git hooks 설정 (선택사항)
+pre-commit install
+```
+
+### Docker 개발 환경
+
+```bash
+# 개발용 컨테이너 빌드
+docker build -t sodasops-dev .
+
+# 개발용 컨테이너 실행
+docker run -it -v $(pwd):/app sodasops-dev bash
+```
+
+## 코딩 스타일
+
+### Python 코딩 스타일
+
+- **PEP 8** 준수
+- **Black** 포맷터 사용
+- **Flake8** 린터 사용
+- **Type hints** 사용 권장
+
+### 파일 구조
+
+```
+component/
+├── config/
+│   └── config.py          # 설정 파일
+├── tmp/                   # 임시 파일
+├── algorithm.py           # 핵심 로직
+├── main.py               # 진입점
+├── test.py               # 테스트
+├── requirements.txt      # 의존성
+├── Dockerfile           # 컨테이너 정의
+├── .dockerignore        # 빌드 제외 파일
+└── README.md            # 문서
+```
+
+### 코드 예시
+
+```python
+"""
+컴포넌트 설명
+
+이 모듈은 데이터 처리 로직을 구현합니다.
+"""
+
+import os
+import pandas as pd
+from typing import List, Dict, Optional
+
+
+def process_data(input_file: str, output_file: str) -> Dict[str, any]:
+    """
+    데이터를 처리하는 함수
+    
+    Args:
+        input_file: 입력 파일 경로
+        output_file: 출력 파일 경로
+        
+    Returns:
+        처리 결과 딕셔너리
+    """
+    try:
+        # 데이터 로드
+        df = pd.read_csv(input_file)
+        
+        # 데이터 처리
+        result = df.describe()
+        
+        # 결과 저장
+        result.to_csv(output_file)
+        
+        return {
+            'status': 'success',
+            'rows_processed': len(df),
+            'output_file': output_file
+        }
+    except Exception as e:
+        return {
+            'status': 'error',
+            'message': str(e)
+        }
+```
+
+## 커밋 메시지 규칙
+
+### 커밋 메시지 형식
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Type 종류
+
+- **feat**: 새로운 기능
+- **fix**: 버그 수정
+- **docs**: 문서 수정
+- **style**: 코드 포맷팅
+- **refactor**: 코드 리팩토링
+- **test**: 테스트 추가/수정
+- **chore**: 빌드 프로세스 또는 보조 도구 변경
+
+### 예시
+
+```
+feat(csv-sort): 새로운 정렬 알고리즘 추가
+
+- 퀵소트 알고리즘 구현
+- 성능 최적화 적용
+- 테스트 케이스 추가
+
+Closes #123
+```
+
+## Pull Request 절차
+
+### PR 생성 전 체크리스트
+
+- [ ] 코드가 코딩 스타일을 준수하는가?
+- [ ] 테스트가 통과하는가?
+- [ ] 문서가 업데이트되었는가?
+- [ ] 커밋 메시지가 규칙을 따르는가?
+
+### PR 템플릿
+
+```markdown
+## 변경 사항
+- 
+
+## 테스트
+- [ ] 로컬 테스트 통과
+- [ ] Docker 테스트 통과
+- [ ] 새로운 테스트 케이스 추가
+
+## 문서
+- [ ] README 업데이트
+- [ ] API 문서 업데이트
+
+## 관련 이슈
+Closes #
+
+## 추가 정보
+```
+
+### PR 리뷰 과정
+
+1. **자동 검사**: CI/CD 파이프라인 실행
+2. **코드 리뷰**: 리뷰어가 코드 검토
+3. **피드백**: 개선 사항 제안
+4. **수정**: 피드백 반영
+5. **승인**: 리뷰어 승인
+6. **병합**: 메인 브랜치로 병합
+
+## 이슈 리포트
+
+### 버그 리포트
+
+버그를 발견하셨다면 다음 정보를 포함하여 이슈를 생성해주세요:
+
+- **버그 설명**: 무엇이 잘못되었는지
+- **재현 단계**: 버그를 재현하는 방법
+- **예상 동작**: 올바른 동작이 무엇인지
+- **실제 동작**: 실제로 일어나는 일
+- **환경 정보**: OS, Python 버전, Docker 버전 등
+- **스크린샷**: 가능한 경우 스크린샷 첨부
+
+### 기능 요청
+
+새로운 기능을 제안하시려면:
+
+- **기능 설명**: 원하는 기능이 무엇인지
+- **사용 사례**: 언제 사용할 것인지
+- **대안**: 고려한 다른 방법이 있는지
+- **우선순위**: 얼마나 중요한지
+
+## 📚 문서화
+
+### 문서 작성 규칙
+
+- **명확성**: 이해하기 쉽게 작성
+- **완성도**: 필요한 모든 정보 포함
+- **일관성**: 용어와 형식 통일
+- **예시**: 실제 사용 예시 포함
+
+### 문서 종류
+
+- **README.md**: 프로젝트 개요 및 시작 가이드
+- **API 문서**: 함수 및 클래스 설명
+- **사용자 가이드**: 단계별 사용법
+- **개발자 가이드**: 개발 환경 설정 및 기여 방법
+
+## 테스트
+
+### 테스트 작성 규칙
+
+- **단위 테스트**: 각 함수/클래스별 테스트
+- **통합 테스트**: 컴포넌트 간 연동 테스트
+- **테스트 커버리지**: 80% 이상 유지
+- **테스트 명명**: 명확한 테스트 이름 사용
+
+### 테스트 예시
+
+```python
+import pytest
+from algorithm import process_data
+
+
+def test_process_data_success():
+    """데이터 처리 성공 테스트"""
+    result = process_data('test_input.csv', 'test_output.csv')
+    assert result['status'] == 'success'
+    assert 'rows_processed' in result
+
+
+def test_process_data_error():
+    """데이터 처리 실패 테스트"""
+    result = process_data('nonexistent.csv', 'output.csv')
+    assert result['status'] == 'error'
+    assert 'message' in result
+```
+
+### 테스트 실행
+
+```bash
+# 전체 테스트 실행
+pytest
+
+# 특정 테스트 실행
+pytest test_algorithm.py::test_process_data_success
+
+# 커버리지 리포트 생성
+pytest --cov=algorithm --cov-report=html
+```
+
+## 커뮤니케이션
+
+### 커뮤니케이션 채널
+
+- **GitHub Issues**: 버그 리포트, 기능 요청
+- **GitHub Discussions**: 일반적인 토론
+- **Pull Request**: 코드 리뷰 및 피드백
+- **이메일**: siwoonson@etri.re.kr
+
+### 커뮤니케이션 규칙
+
+- **존중**: 모든 기여자를 존중
+- **건설적**: 건설적인 피드백 제공
+- **명확성**: 명확하고 간결한 의사소통
+- **인내**: 새로운 기여자에게 인내심
+
+### 행동 강령
+
+- **포용성**: 모든 배경의 기여자 환영
+- **존중**: 다른 의견 존중
+- **건설성**: 건설적인 토론 장려
+- **전문성**: 전문적인 태도 유지
+
+## 기여자 인정
+
+### 기여자 목록
+
+모든 기여자는 다음에 인정됩니다:
+
+- **GitHub Contributors** 페이지
+- **프로젝트 README** 기여자 섹션
+- **릴리즈 노트** 기여자 명시
+
+### 기여 수준
+
+- **Bronze**: 1-5개 기여
+- **Silver**: 6-15개 기여
+- **Gold**: 16개 이상 기여
+- **Platinum**: 핵심 기여자
+
+## 문의
+
+기여 관련 문의사항이 있으시면:
+
+- **이메일**: siwoonson@etri.re.kr
+- **GitHub Issues**: [이슈 생성](https://github.com/sodas-dataops/pipeline-components/issues)
+- **GitHub Discussions**: [토론 참여](https://github.com/sodas-dataops/pipeline-components/discussions)
+
+---
+
+**감사합니다!** SODASops 프로젝트에 기여해주셔서 감사합니다. 여러분의 기여가 더 나은 데이터 파이프라인 컴포넌트를 만들어갑니다. 
