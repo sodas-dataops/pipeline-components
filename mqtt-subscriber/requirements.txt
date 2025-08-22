@@ -1,0 +1,4 @@
+paho-mqtt
+boto3
+tabulate
+psutil
