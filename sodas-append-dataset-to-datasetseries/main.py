@@ -3,7 +3,7 @@ import boto3
 from io import StringIO
 from config.config import args
 import asyncio
-import algorithm
+from . import algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]

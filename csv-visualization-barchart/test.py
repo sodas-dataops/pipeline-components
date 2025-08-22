@@ -1,4 +1,4 @@
-import algorithm
+from . import algorithm
 from io import StringIO
 
 if __name__ == '__main__' :

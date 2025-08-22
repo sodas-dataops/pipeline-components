@@ -1,7 +1,7 @@
 import os
 import boto3
 from config.config import args
-import algorithm
+from . import algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]

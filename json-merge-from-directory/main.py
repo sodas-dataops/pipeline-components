@@ -4,7 +4,7 @@ import json
 import time
 from io import StringIO
 from config.config import args
-import algorithm
+from . import algorithm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 

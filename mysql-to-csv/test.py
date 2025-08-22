@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from config.config import args
-import algorithm
+from . import algorithm
 
 def test_mysql_to_csv():
     """MySQL to CSV 기능을 테스트합니다."""

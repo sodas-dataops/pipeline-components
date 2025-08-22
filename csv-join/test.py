@@ -4,7 +4,7 @@ from config.config import args
 
 import pandas as pd
 import sodas
-import algorithm
+from . import algorithm
 
 from io import StringIO
 

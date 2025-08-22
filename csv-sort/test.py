@@ -1,4 +1,4 @@
-import algorithm
+from . import algorithm
 
 if __name__ == '__main__' :
     algorithm.solution(

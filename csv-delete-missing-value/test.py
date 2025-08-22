@@ -4,7 +4,7 @@ from config.config import args
 
 import pandas as pd
 import sodas
-import algorithm
+from . import algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]
