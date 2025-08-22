@@ -1,11 +1,15 @@
 import algorithm
+from io import StringIO
 
 if __name__ == '__main__' :
+    with open('./tmp/test_input_data.csv', 'r', encoding='utf-8') as f:
+        input_data = StringIO(f.read())
+        
     algorithm.solution(
-                        './tmp/test_input_data.csv', 
-                        'quantity',
-                        'price',
-                        './tmp/test_output_data.png', 
-                        title='Distribution of Feature Column', 
-                        ylabel='Values'
-                        )
+        data=input_data, 
+        group_by_column='quantity',
+        value_column='price',
+        image_file_name='./tmp/test_output_data.png', 
+        title='Distribution of Feature Column', 
+        ylabel='Values'
+    )

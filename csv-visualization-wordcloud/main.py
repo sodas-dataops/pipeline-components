@@ -64,10 +64,10 @@ if __name__ == '__main__' :
     
     settings = args['settings']
     algorithm.solution(
-        input1_data,
-        settings['word_column'],
-        settings['count_column'],
-        local_file_path, 
+        data=input1_data,
+        word_column=settings['word_column'],
+        count_column=settings['count_column'],
+        image_file_name=local_file_path, 
         max_words=settings['max_words'],
     )
 

@@ -104,12 +104,12 @@ if __name__ == '__main__' :
     
     # 임베딩 실행
     output_filename, report = algorithm.solution(
-        input1_obj, 
-        local_file_path, 
-        args['settings']['target_column'],
-        args['settings']['idx_column'],
-        args['settings']['model_name'],
-        existing_embeddings
+        data=input1_obj, 
+        output_filename=local_file_path, 
+        target_column=args['settings']['target_column'],
+        idx_column=args['settings']['idx_column'],
+        model_name=args['settings']['model_name'],
+        existing_embeddings=existing_embeddings
     )
 
     # 결과 저장

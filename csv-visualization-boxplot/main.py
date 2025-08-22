@@ -82,12 +82,12 @@ if __name__ == '__main__' :
 
     settings = args['settings']
     image_file_path, report = algorithm.solution(
-        input1_data,
-        settings['group_by_column'],
-        settings['value_column'],
-        local_file_path, 
-        settings['title'],
-        settings['ylabel']
+        data=input1_data,
+        group_by_column=settings['group_by_column'],
+        value_column=settings['value_column'],
+        image_file_name=local_file_path, 
+        title=settings['title'],
+        ylabel=settings['ylabel']
     )
 
     output1 = args['output1']

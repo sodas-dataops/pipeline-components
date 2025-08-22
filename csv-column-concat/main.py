@@ -80,8 +80,8 @@ if __name__ == '__main__':
     # 컬럼 연결 작업 수행
     settings = args['settings']
     output_file, report_content = algorithm.solution(
-        local_input_path,
-        local_output_path,
+        input_filename=local_input_path,
+        output_filename=local_output_path,
         target_cols=settings['target_cols'],
         optional_cols=settings.get('optional_cols'),
         delimiter=settings.get('delimiter', ','),

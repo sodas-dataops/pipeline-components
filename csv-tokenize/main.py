@@ -79,9 +79,9 @@ if __name__ == '__main__' :
     
     settings = args['settings']
     output_filename, report = algorithm.solution(
-        input1_data,
-        settings['text_column'],
-        local_file_path, 
+        data=input1_data,
+        text_column=settings['text_column'],
+        output_filename=local_file_path, 
         new_column=settings.get('new_column'),
         ignore_words=settings['ignore_words'],
         remove_stopwords=settings['remove_stopwords'], 

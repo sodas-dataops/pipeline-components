@@ -113,6 +113,16 @@ def generate_report(saved_files, samples, total_msgs, settings, execution_time):
     return report
 
 def solution(settings, upload_callback=None):
+    """
+    MQTT 브로커에서 메시지를 수신하고 저장하는 함수.
+
+    Parameters:
+    - settings: 설정 정보 (dict)
+    - upload_callback: 메시지 파일 업로드 콜백 함수 (함수, 기본값: None)
+
+    Returns:
+    - tuple: (저장된 파일 경로 리스트, 보고서 내용)
+    """
     start_time = datetime.now()
     print(f"* MQTT 구독 시작")
     print(f"- 브로커: {settings['mqtt_broker']}, 토픽: {settings['mqtt_topic']}")

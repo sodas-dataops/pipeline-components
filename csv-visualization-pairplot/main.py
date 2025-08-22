@@ -21,12 +21,12 @@ def get_access_token (base_url, user_name, refresh_token):
     return json.loads(res.content.decode('ascii'))['accessToken']
 
 # Download data file.
-def download_data_file (base_url, access_token, storage_id, bucket_name, object_name, file_name):
+def download_data_file (base_url, access_token, storage_id, bucket_name, object_path, file_name):
     url = 'http://' + base_url + '/api/v1/devops/development/environment/minio/object/download'
     params = {
         'storageId': storage_id,
         'bucketName': bucket_name,
-        'objectName': object_name
+        'objectPath': object_path
     }
     headers = {
         'Accept' : 'text/csv; charset=utf-8',
@@ -60,8 +60,8 @@ def get_connection (base_url, access_token, storage_id):
         'secret_key': [o['value'] for o in storage['config']['environments'] if o['name'] == 'MINIO_SECRET_KEY'][0]    }
     return connection
 
-def upload_data_file (minio_client, bucket_name, object_name, file_name):
-    minio_client.fput_object(bucket_name, object_name, '.tmp/' + file_name)
+def upload_data_file (minio_client, bucket_name, object_path, file_name):
+    minio_client.fput_object(bucket_name, object_path, '.tmp/' + file_name)
     print('The file uploads successfully.')
 
 data_file_name = 'data.csv'
@@ -72,7 +72,7 @@ download_data_file(
     access_token=get_access_token(args['input1']['base_url'], args['input1']['user_name'], args['input1']['refresh_token']), 
     storage_id=args['input1']['storage_id'], 
     bucket_name=args['input1']['bucket_name'], 
-    object_name=args['input1']['object_name'], 
+    object_path=args['input1']['object_path'], 
     file_name=data_file_name)
 
 dataFile = pd.read_csv('.tmp/' + data_file_name)
@@ -94,4 +94,4 @@ connection_info = get_connection(
     storage_id=args['output1']['storage_id']
 )
 minio_client = Minio(endpoint=connection_info['end_point']+':'+str(connection_info['port']), secure=connection_info['use_ssl'], access_key=connection_info['access_key'], secret_key=connection_info['secret_key'])
-upload_data_file(minio_client, args['output1']['bucket_name'], args['output1']['object_name'], image_file_name)
+upload_data_file(minio_client, args['output1']['bucket_name'], args['output1']['object_path'], image_file_name)

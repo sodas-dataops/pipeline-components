@@ -78,13 +78,13 @@ if __name__ == '__main__' :
     ) # data read
     
     output_filename, report = algorithm.solution(
-        input1_data, 
-        local_file_path, 
-        args['input_cols'],
-        args['group_by'],
-        args['statistics'],
-        args['percentile_amounts'],
-        args['trimmed_mean_amounts']
+        data=input1_data, 
+        output_filename=local_file_path, 
+        input_cols=args['input_cols'],
+        group_by=args['group_by'],
+        statistics=args['statistics'],
+        percentile_amounts=args['percentile_amounts'],
+        trimmed_mean_amounts=args['trimmed_mean_amounts']
     )
 
     output1 = args['output1']

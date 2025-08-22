@@ -106,6 +106,15 @@ def generate_report(
 def solution(data: object, text_column: str, output_filename: str, new_column: str = 'tokenized_text', ignore_words: list = None, remove_stopwords: bool = True, keep_tokenized_column_only: bool = False) -> tuple:
     """
     대용량 CSV의 특정 텍스트 컬럼을 한국어 토큰화 + 불용어 제거하여 새 컬럼으로 추가하는 고성능 버전.
+
+    Parameters:
+    - data: CSV 파일 경로
+    - text_column: 토큰화할 텍스트 컬럼명
+    - output_filename: 결과를 저장할 CSV 파일의 이름
+    - new_column: 토큰화된 텍스트를 저장할 새 컬럼명
+    - ignore_words: 무시할 단어 목록
+    - remove_stopwords: 불용어 제거 여부
+    - keep_tokenized_column_only: 토큰화된 컬럼만 유지 여부
     
     Returns:
     - tuple: (저장된 파일 경로, 보고서 내용)

@@ -140,6 +140,17 @@ def generate_report(saved_files, samples, total_lines, settings, execution_time)
     return report
 
 def solution(settings, kubeconfig_path, upload_callback=None):
+    """
+    Kubernetes 로그를 수집하고 저장하는 함수.
+
+    Parameters:
+    - settings: 설정 정보 (dict)
+    - kubeconfig_path: kubeconfig 파일 경로 (str)
+    - upload_callback: 로그 파일 업로드 콜백 함수 (함수, 기본값: None)
+
+    Returns:
+    - tuple: (저장된 파일 경로 리스트, 보고서 내용)
+    """
     start_time = datetime.now()
     print(f"* Kubernetes 로그 수집 시작")
     print(f"- 네임스페이스: {settings['namespace']}, 파드: {settings['pod']}, 컨테이너: {settings['container']}")

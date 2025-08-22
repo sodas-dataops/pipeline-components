@@ -113,7 +113,15 @@ def generate_report(stats, sql_query, execution_time):
     return report
 
 def solution(mysql_config, sql_query, output_file_path, chunksize=10000):
-    """메인 솔루션 함수 (chunk 단위 스트리밍 저장)"""
+    """
+    MySQL에서 SQL 쿼리를 chunk 단위로 실행하고 결과를 CSV로 스트리밍 저장하는 함수.
+
+    Parameters:
+    - mysql_config: MySQL 연결 정보 (dict)
+    - sql_query: 실행할 SQL 쿼리 (str)
+    - output_file_path: 결과를 저장할 파일 경로 (str)
+    - chunksize: 각 chunk의 행 수 (int, 기본값: 10000)
+    """
     start_time = datetime.now()
     try:
         stats = stream_sql_to_csv(mysql_config, sql_query, output_file_path, chunksize=chunksize)

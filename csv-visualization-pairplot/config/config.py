@@ -10,7 +10,7 @@ args =\
                 'user_name': '...',
                 'refresh_token': '...',
                 'end_point': '...',
-                'object_name': '...',
+                'object_path': '...',
             },
             'feature_names': ['sepal_length', 'sepal_width', 'petal_length', 'petal_width'],
             'target_name': 'species',
@@ -20,7 +20,7 @@ args =\
                 'user_name': '...',
                 'refresh_token': '...',                
                 'end_point': '...',
-                'object_name': '...'
+                'object_path': '...'
             }
         },
         'production': {

@@ -86,15 +86,15 @@ if __name__ == '__main__' :
     ) # data read
     
     output_filename, report = algorithm.solution(
-        left_table, 
-        right_table, 
-        local_file_path,
-        args['left_on'], 
-        args['right_on'], 
-        args['how'], 
-        args['lsuffix'], 
-        args['rsuffix'], 
-        args['sort']
+        left_table=left_table, 
+        right_table=right_table, 
+        output_filename=local_file_path,
+        left_on=args['left_on'], 
+        right_on=args['right_on'], 
+        how=args['how'], 
+        lsuffix=args['lsuffix'], 
+        rsuffix=args['rsuffix'], 
+        sort=args['sort']
     )
     
     output_result_table = args['result_table']

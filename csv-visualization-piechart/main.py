@@ -82,9 +82,9 @@ if __name__ == '__main__' :
     
     settings = args['settings']
     html_file_path, report = algorithm.solution(
-        input1_data,
-        settings['feature_name'],
-        local_file_path, 
+        data=input1_data,
+        feature_name=settings['feature_name'],
+        image_file_name=local_file_path, 
         chart_title=settings['chart_title'],
     )
 

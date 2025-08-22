@@ -80,12 +80,12 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
 
     Parameters:
         data (str): CSV 파일 경로. 알고리즘 내에서 pandas의 read_csv로 읽어와야 합니다.
+        output_filename (str): 결과를 저장할 CSV 파일의 이름.
         input_cols (list of str): 통계를 계산할 컬럼들의 리스트.
         group_by (list of str): 그룹화할 컬럼들의 리스트.
         statistics (list of str): 계산할 통계량들의 리스트.
         percentile_amounts (list of float, optional): 백분위수를 계산할 때 사용할 백분율의 리스트.
         trimmed_mean_amounts (float, optional): 트리밍된 평균을 계산할 때 사용할 값. (0.0 <= trimmed_mean_amounts < 0.5)
-        output_filename (str): 결과를 저장할 CSV 파일의 이름.
 
     Returns:
         tuple: (저장된 파일 경로, 보고서 내용)

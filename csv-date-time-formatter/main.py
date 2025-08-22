@@ -69,13 +69,13 @@ if __name__ == '__main__' :
     
     # 날짜/시간 포맷 변경
     output_file, report_content = algorithm.solution(
-        input1_data, 
-        local_file_path, 
-        args['input_cols'],
-        args['display_mode'],
-        args['suffix'],
-        args['in_format'],
-        args['out_format']
+        data=input1_data, 
+        output_filename=local_file_path, 
+        input_cols=args['input_cols'],
+        display_mode=args['display_mode'],
+        suffix=args['suffix'],
+        in_format=args['in_format'],
+        out_format=args['out_format']
     )
     
     # 보고서 저장

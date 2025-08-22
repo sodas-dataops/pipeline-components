@@ -150,8 +150,8 @@ if __name__ == '__main__':
         
         # Step 2: Merge JSON files
         algorithm.solution(
-            input_data_list,
-            local_file_path
+            input_data=input_data_list,
+            output_path=local_file_path
         )
         
         # Step 3: Save output JSON
