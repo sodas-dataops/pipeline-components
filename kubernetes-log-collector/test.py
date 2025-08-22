@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import base64
 import tempfile
 from config.config import args
-from . import algorithm
+from core import algorithm
 
 def decode_kubeconfig_from_env(kubeconfig_b64):
     if not kubeconfig_b64:

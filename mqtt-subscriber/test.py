@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from config.config import args
-from . import algorithm
+from core import algorithm
 
 def test_mqtt_subscriber():
     print("MQTT Subscriber 테스트 시작")

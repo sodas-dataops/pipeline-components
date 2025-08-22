@@ -6,7 +6,7 @@ MQTT 클라이언트 및 ThingSpeak IoT 데이터 실시간 수신기
 import os
 import boto3
 from config.config import args
-from . import algorithm
+from core import algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]

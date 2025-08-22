@@ -1,4 +1,4 @@
-from . import algorithm
+from core import algorithm
 import time
 from io import StringIO
 
