@@ -1,4 +1,4 @@
-from core import algorithm
+from core import algorithm_json_to_csv as algorithm
 
 if __name__ == '__main__' :
     algorithm.solution(

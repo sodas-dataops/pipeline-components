@@ -2,7 +2,7 @@ import os
 import boto3
 from io import StringIO
 from config.config import args
-from core import algorithm
+from core import algorithm_mysql_to_csv as algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]

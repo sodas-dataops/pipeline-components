@@ -1,4 +1,4 @@
-from core import algorithm
+from core import algorithm_upload_object_file_to_restapi as algorithm
 
 if __name__ == '__main__' :
     algorithm.solution(

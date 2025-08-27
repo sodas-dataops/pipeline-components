@@ -4,7 +4,7 @@ from config.config import args
 
 import pandas as pd
 import sodas
-from core import algorithm
+from core import algorithm_csv_join as algorithm
 
 from io import StringIO
 

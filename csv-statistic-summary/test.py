@@ -1,4 +1,4 @@
-from core import algorithm
+from core import algorithm_csv_statistic_summary as algorithm
 
 if __name__ == '__main__' :
     algorithm.solution(

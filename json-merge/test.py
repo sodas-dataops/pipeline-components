@@ -1,4 +1,4 @@
-from core import algorithm
+from core import algorithm_json_merge as algorithm
 
 BASE_URL = "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do"
 COMMON_QS = "infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet"

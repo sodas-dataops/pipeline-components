@@ -1,4 +1,4 @@
-from core import algorithm
+from core import algorithm_csv_transform as algorithm
 from io import StringIO
 
 if __name__ == '__main__' :

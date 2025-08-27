@@ -1,4 +1,4 @@
-from core import algorithm
+from core import algorithm_csv_tokenize as algorithm
 import time
 from io import StringIO
 

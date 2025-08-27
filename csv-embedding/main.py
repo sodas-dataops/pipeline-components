@@ -3,7 +3,7 @@ import boto3
 import numpy as np
 from io import StringIO
 from config.config import args
-from core import algorithm
+from core import algorithm_csv_embedding as algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]

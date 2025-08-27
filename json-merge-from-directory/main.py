@@ -4,7 +4,7 @@ import json
 import time
 from io import StringIO
 from config.config import args
-from core import algorithm
+from core import algorithm_json_merge_from_directory as algorithm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 

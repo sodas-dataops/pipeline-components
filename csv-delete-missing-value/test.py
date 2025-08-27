@@ -4,7 +4,7 @@ from config.config import args
 
 import pandas as pd
 import sodas
-from core import algorithm
+from core import algorithm_csv_delete_missing_value as algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]
