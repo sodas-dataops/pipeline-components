@@ -55,7 +55,7 @@ def process_json_file(args):
         print_progress()
         
         return json_data
-    except Exception as e:
+    except (json.JSONDecodeError, UnicodeDecodeError, KeyError, boto3.exceptions.Boto3Error) as e:
         with print_lock:
             print(f"\n- 경고: {obj.key} 처리 중 오류 발생: {str(e)}")
             processed_files += 1
@@ -117,7 +117,7 @@ def get_objects_from_directory(s3_resource, bucket_name: str, directory_path: st
         
         return json_data_list
         
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, ValueError) as e:
         print(f'\n- 오류: {bucket_name}/{directory_path} 처리 중 실패: {e}')
         raise
 
@@ -126,7 +126,7 @@ def put_object(s3_resource, local_file_path: str, bucket_name: str, object_path:
         obj = s3_resource.Object(bucket_name, object_path)
         obj.upload_file(local_file_path)
         print(f'- 파일 업로드 완료: {bucket_name}/{object_path}')
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
         print(f'- 오류: {local_file_path} 업로드 실패: {e}')
         raise
 
@@ -167,5 +167,5 @@ if __name__ == '__main__':
         # 전체 처리 시간 출력
         total_time = time.time() - start_time
         print(f"\n[완료] 전체 처리 시간: {total_time:.2f}초")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"\n- 오류: 전체 처리 중 실패: {e}")

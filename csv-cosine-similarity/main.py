@@ -23,7 +23,7 @@ def get_npz(s3_resource, bucket_name: str, object_path: str, local_path: str):
         obj = s3_resource.Object(bucket_name, object_path)
         obj.download_file(local_path)
         print(f"Downloaded {object_path} to {local_path}")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
         print(f"Error downloading {object_path}: {e}")
         raise
 
@@ -32,7 +32,7 @@ def put_file(s3_resource, local_path: str, bucket_name: str, object_path: str):
         obj = s3_resource.Object(bucket_name, object_path)
         obj.upload_file(local_path)
         print(f"Uploaded {local_path} to {object_path}")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
         print(f"Error uploading {local_path}: {e}")
         raise
 

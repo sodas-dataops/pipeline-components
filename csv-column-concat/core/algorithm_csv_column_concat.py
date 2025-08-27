@@ -85,7 +85,7 @@ def solution(input_filename: str, output_filename: str, target_cols: list, optio
     try:
         df = pd.read_csv(input_filename)
         print(f"- CSV 데이터 로드 완료: {len(df)}행 x {len(df.columns)}열")
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, pd.errors.EmptyDataError) as e:
         raise ValueError(f"CSV 파일 로드 실패: {str(e)}")
     
     # 입력 파일 크기 확인
@@ -114,7 +114,7 @@ def solution(input_filename: str, output_filename: str, target_cols: list, optio
     try:
         df.to_csv(output_filename, index=False)
         print(f"- CSV 저장 완료: {output_filename}")
-    except Exception as e:
+    except (PermissionError, OSError, UnicodeEncodeError) as e:
         raise IOError(f"CSV 저장 실패: {str(e)}")
     
     # 출력 파일 크기 확인

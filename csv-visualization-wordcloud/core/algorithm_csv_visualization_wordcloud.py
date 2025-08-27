@@ -34,23 +34,17 @@ def solution(data: object, word_column: str, count_column: str, image_file_name:
     try:
         # CSV 데이터 로드
         dataFile = pd.read_csv(data)
-        print(dataFile)
-        
+
         # 컬럼 존재 여부 검증
         if word_column not in dataFile.columns or count_column not in dataFile.columns:
             raise KeyError(f"Columns '{word_column}' or '{count_column}' not found in the provided data")
 
         # 결측값 및 비정상 데이터 필터링
-        print(1)
         dataFile = dataFile[[word_column, count_column]].dropna()  # NaN 제거
-        print(2)
         dataFile = dataFile[dataFile[count_column] > 0]  # 빈도수가 양수인 데이터만 사용
-        print(dataFile)
         
         # 단어와 빈도수 딕셔너리 생성
         word_freq = dict(zip(dataFile[word_column].astype(str), dataFile[count_column]))
-        print(33333)
-        print(word_freq)
 
         # 워드클라우드 생성 가능 여부 검증
         if not word_freq:
@@ -79,6 +73,6 @@ def solution(data: object, word_column: str, count_column: str, image_file_name:
         plt.close()
         print(f"Word cloud successfully saved to {image_file_name}")
 
-    except Exception as e:
+    except (FileNotFoundError, OSError, RuntimeError) as e:
         # 에러 메시지 출력
         print(f"An error occurred: {e}")

@@ -39,7 +39,7 @@ def get_object(
             return StringIO(content.decode('utf-8'))
             
         print(f"Successfully retrieved object: {object_path}")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError, ValueError) as e:
         print(f'Failed to download from {bucket_name}/{object_path}: {e}')
         raise
 
@@ -54,7 +54,7 @@ def put_object(
         obj.upload_file(local_file_path)
         
         print(f'Successfully uploaded {local_file_path} to {bucket_name}/{object_path}')
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
         print(f'Failed to upload {local_file_path} to {bucket_name}/{object_path}: {e}')
         raise
 
@@ -69,7 +69,7 @@ def save_report(
         obj.put(Body=report_content.encode('utf-8'))
         
         print(f'Successfully uploaded report to {bucket_name}/{object_path}')
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, UnicodeEncodeError) as e:
         print(f'Failed to upload report to {bucket_name}/{object_path}: {e}')
         raise
 
@@ -90,7 +90,7 @@ if __name__ == '__main__' :
             is_npz=True
         )
         print("기존 임베딩 결과를 찾았습니다.")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, ValueError, FileNotFoundError) as e:
         print("기존 임베딩 결과가 없거나 읽을 수 없습니다:", e)
 
     # 입력 데이터 처리

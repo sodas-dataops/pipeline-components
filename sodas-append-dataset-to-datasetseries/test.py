@@ -37,7 +37,7 @@ async def test_sodas_append_dataset():
         print("테스트 성공!")
         print(f"생성된 데이터셋 ID: {dataset_id}")
         
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"테스트 실패: {str(e)}")
         raise
     

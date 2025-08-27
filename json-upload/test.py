@@ -26,7 +26,7 @@ def test_json_upload():
             assert loaded_data == test_data
             print("Data verification passed!")
             
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"Test failed: {str(e)}")
         raise
 

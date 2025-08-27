@@ -115,7 +115,7 @@ def solution(api_url, file_path_query, local_file_path) -> tuple:
     except requests.exceptions.RequestException as e:
         print(f"- 네트워크 오류 발생: {str(e)}")
         raise
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"- 예상치 못한 오류 발생: {str(e)}")
         raise
     

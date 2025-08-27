@@ -82,6 +82,6 @@ def solution(input_data: BytesIO, output_csv_path: str) -> tuple:
         
         return output_csv_path, report
         
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"Failed to process Parquet data: {e}")
         raise

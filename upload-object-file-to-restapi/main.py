@@ -27,7 +27,7 @@ def download_file(s3_resource, bucket_name, object_path, local_file_path):
         obj = s3_resource.Object(bucket_name, object_path)
         obj.download_file(local_file_path)
         print(f"Downloaded {object_path} to {local_file_path}")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
         print(f"Failed to download file: {e}")
         raise
 
@@ -36,7 +36,7 @@ def save_report(s3_resource, report_content: str, bucket_name: str, object_path:
         obj = s3_resource.Object(bucket_name, object_path)
         obj.put(Body=report_content.encode('utf-8'))
         print(f'Successfully uploaded report to {bucket_name}/{object_path}')
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, UnicodeEncodeError) as e:
         print(f'Failed to upload report to {bucket_name}/{object_path}: {e}')
         raise
 
@@ -45,7 +45,7 @@ def delete_object(s3_resource, bucket_name: str, object_path: str):
         obj = s3_resource.Object(bucket_name, object_path)
         obj.delete()
         print(f"Successfully deleted object: {bucket_name}/{object_path}")
-    except Exception as e:
+    except boto3.exceptions.Boto3Error as e:
         print(f'Failed to delete {bucket_name}/{object_path}: {e}')
         raise
 

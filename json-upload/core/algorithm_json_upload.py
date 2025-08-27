@@ -72,7 +72,7 @@ def solution(json_data: dict, output_filename: str):
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(json_data, f, ensure_ascii=False, indent=2)
         print(f"- 파일 저장 완료: {output_filename}")
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         raise IOError(f"파일 저장 중 오류 발생: {str(e)}")
     
     # 파일 크기 확인

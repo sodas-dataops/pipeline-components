@@ -93,7 +93,7 @@ def solution(input_data: StringIO, target_column: str, transform_function_str: s
             transform_function = eval(transform_function_str)
             if not callable(transform_function):
                 raise ValueError(f"The provided lambda function is not callable: {transform_function_str}")
-        except Exception as e:
+        except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
             raise ValueError(f"Failed to parse lambda function: {e}")
         
         # 대상 컬럼을 문자열로 변환
@@ -129,6 +129,6 @@ def solution(input_data: StringIO, target_column: str, transform_function_str: s
 
         return output_csv_path, report
 
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"Failed to process CSV data: {e}")
         raise

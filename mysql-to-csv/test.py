@@ -28,7 +28,7 @@ def test_mysql_to_csv():
         print("보고서 내용:")
         print(report_content)
         
-    except Exception as e:
+    except (FileNotFoundError, OSError, RuntimeError) as e:
         print(f"테스트 실패: {e}")
 
 if __name__ == "__main__":

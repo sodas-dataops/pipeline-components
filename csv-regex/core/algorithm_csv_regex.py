@@ -120,6 +120,6 @@ def solution(input_data: StringIO, target_column: str, regex_pattern: str, outpu
         
         return output_csv_path, report
         
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
         print(f"Failed to process CSV data: {e}")
         raise

@@ -22,7 +22,7 @@ def test_mqtt_subscriber():
             print(f"메시지 샘플 (최대 3개):")
             for line in lines[:3]:
                 print(line.strip())
-    except Exception as e:
+    except (FileNotFoundError, OSError, RuntimeError) as e:
         print(f"테스트 실패: {e}")
 
 if __name__ == "__main__":

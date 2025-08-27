@@ -98,7 +98,7 @@ def solution(input_filename: str, output_filename: str):
         with open(input_filename, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
         print(f"- JSON 데이터 로드 완료: {len(json_data)}개 항목")
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, json.JSONDecodeError) as e:
         raise ValueError(f"JSON 파일 로드 실패: {str(e)}")
     
     # JSON 데이터 크기 확인
@@ -110,7 +110,7 @@ def solution(input_filename: str, output_filename: str):
     try:
         df = pd.DataFrame(json_data)
         print(f"- 변환 완료: {len(df)}행 x {len(df.columns)}열")
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         raise ValueError(f"DataFrame 변환 실패: {str(e)}")
     
     # CSV로 저장
@@ -118,7 +118,7 @@ def solution(input_filename: str, output_filename: str):
     try:
         df.to_csv(output_filename, index=False, encoding='utf-8')
         print(f"- CSV 저장 완료: {output_filename}")
-    except Exception as e:
+    except (PermissionError, OSError, UnicodeEncodeError) as e:
         raise IOError(f"CSV 저장 실패: {str(e)}")
     
     # CSV 파일 크기 확인

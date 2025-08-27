@@ -128,6 +128,6 @@ def solution(mysql_config, sql_query, output_file_path, chunksize=10000):
         execution_time = datetime.now() - start_time
         report_content = generate_report(stats, sql_query, execution_time)
         return output_file_path, report_content
-    except Exception as e:
+    except (ValueError, IOError, OSError) as e:
         print(f"솔루션 실행 중 오류 발생: {e}")
         raise 

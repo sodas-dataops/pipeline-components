@@ -28,7 +28,7 @@ def test_k8s_log_collector():
         print(report_content)
         for f in saved_files:
             print(f"  - {f}")
-    except Exception as e:
+    except (FileNotFoundError, OSError, RuntimeError) as e:
         print(f"테스트 실패: {e}")
 
 if __name__ == "__main__":

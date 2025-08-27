@@ -104,7 +104,7 @@ def collect_follow(settings, kubeconfig_path, upload_callback=None):
                             f_tmp = open(tmp_file, 'a', encoding='utf-8')
                             last_save = now
                 
-                except Exception as e:
+                except (FileNotFoundError, OSError, RuntimeError) as e:
                     if "read timed out" in str(e).lower():
                         print(f"[INFO] 5초간 로그 데이터가 없으나 계속 대기")
                         continue
@@ -112,7 +112,7 @@ def collect_follow(settings, kubeconfig_path, upload_callback=None):
                         print(f"[ERROR] 로그 스트림 중 오류: {e}")
                         break
                         
-        except Exception as e:
+        except (FileNotFoundError, OSError, RuntimeError) as e:
             print(f"[ERROR] 로그 스트림 중 오류: {e}")
         finally:
             # 마지막 남은 로그 저장

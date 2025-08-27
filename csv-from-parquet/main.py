@@ -24,7 +24,7 @@ def get_object(s3_resource, bucket_name: str, object_path: str) -> BytesIO:
         content = data['Body'].read()
         print(f"Successfully retrieved object: {object_path}")
         return BytesIO(content)
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, KeyError) as e:
         print(f'Failed to download from {bucket_name}/{object_path}: {e}')
         raise
 
@@ -33,7 +33,7 @@ def put_object(s3_resource, local_file_path: str, bucket_name: str, object_path:
         obj = s3_resource.Object(bucket_name, object_path)
         obj.upload_file(local_file_path)
         print(f'Successfully uploaded {local_file_path} to {bucket_name}/{object_path}')
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
         print(f'Failed to upload {local_file_path} to {bucket_name}/{object_path}: {e}')
         raise
 
@@ -48,7 +48,7 @@ def save_report(
         obj.put(Body=report_content.encode('utf-8'))
         
         print(f'Successfully uploaded report to {bucket_name}/{object_path}')
-    except Exception as e:
+    except (boto3.exceptions.Boto3Error, UnicodeEncodeError) as e:
         print(f'Failed to upload report to {bucket_name}/{object_path}: {e}')
         raise
 
