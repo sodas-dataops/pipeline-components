@@ -12,7 +12,7 @@ args =\
                 'object_path': 'test_input_data.csv',
             },
             'settings': {
-                'api_url': 'http://semantic-hub.221.154.134.31.traefik.me:10019/api/v1/pipeline/upload',
+                'api_url': 'http://semantic-hub.xxx.xxx.xxx.xxx:xxxxx/api/v1/pipeline/upload',
                 'file_path_query': '/path/to/api/upload',
             },
             'task_report': {

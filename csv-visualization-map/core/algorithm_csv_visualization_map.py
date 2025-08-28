@@ -108,8 +108,7 @@ def solution(data: str, label_column: str, lat_column: str, lon_column: str, out
         # 장애인 포털 데모를 위해 임시로 하이퍼링크 추가
         # 링크 주소와 텍스트를 구성
         label_text = str(row[label_column])
-        link_url = f"http://dataops-barrier-free-job-portal.221.154.134.31.traefik.me:10019/search/job?company_name={label_text}"
-        popup_html = f'<a href="{link_url}" target="_top">{label_text}</a>'
+        popup_html = f'{label_text}'
 
         folium.Marker(
             location=[row[lat_column], row[lon_column]],

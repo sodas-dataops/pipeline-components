@@ -1,2 +1,1 @@
-pandas
-sodas
+pandas==1.3.5

@@ -1,2 +1,2 @@
-pandas
-boto3
+pandas==1.3.5
+boto3==1.34.34
