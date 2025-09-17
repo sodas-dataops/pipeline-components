@@ -12,9 +12,9 @@ def get_memory_usage():
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        print("✅ MQTT 브로커 연결 성공!")
+        print("MQTT 브로커 연결 성공!")
     else:
-        print(f"❌ MQTT 연결 실패: {rc}")
+        print(f"MQTT 연결 실패: {rc}")
 
 def on_message(client, userdata, msg):
     message = msg.payload.decode('utf-8')
