@@ -13,7 +13,8 @@ args = \
                 'object_path': 'dir01/input.json',
             },
             'settings': {
-                'output_filename': 'output.csv',
+                'flatten_json': False,  # JSON 평탄화 여부 (기본값: False)
+                'flatten_separator': '_',  # 평탄화 시 사용할 구분자
             },
             'output1': {
                 'type': 'ceph',

@@ -84,11 +84,15 @@ if __name__ == '__main__':
     # JSON 데이터를 임시 파일로 저장
     with open(local_input_path, 'w', encoding='utf-8') as f:
         f.write(input_obj.getvalue())
+
+    # 설정 가져오기
+    settings = args['settings']
     
     # JSON을 CSV로 변환
     output_file, report_content = algorithm.solution(
         local_input_path,
-        local_output_path
+        local_output_path,
+        settings
     )
     
     # 보고서 저장

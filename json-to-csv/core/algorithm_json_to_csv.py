@@ -2,9 +2,15 @@ import json
 import csv
 import re
 import time
-import pandas as pd
 import os
 from datetime import datetime
+
+try:
+    import pandas as pd
+except ImportError as e:
+    print(f"pandas import 오류: {e}")
+    print("pandas와 numpy 버전 호환성 문제일 수 있습니다.")
+    raise
 
 def clean_text(text):
     """텍스트에서 불필요한 공백을 제거합니다."""
@@ -29,7 +35,7 @@ def flatten_json(nested_json, parent_key='', sep='_'):
     return dict(items)
 
 def generate_report(json_data: list, csv_data: pd.DataFrame, input_filename: str, output_filename: str, 
-                  json_size: int, csv_size: int, elapsed_time: float) -> str:
+                  json_size: int, csv_size: int, elapsed_time: float, settings: dict = None) -> str:
     """
     작업 보고서를 생성하는 함수.
     
@@ -51,6 +57,8 @@ def generate_report(json_data: list, csv_data: pd.DataFrame, input_filename: str
 - **작업 유형**: JSON 리스트를 CSV로 변환
 - **실행 시간**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 - **소요 시간**: {elapsed_time:.2f}초
+- **평탄화 설정**: {'활성화' if settings and settings.get('flatten_json', False) else '비활성화'}
+- **평탄화 구분자**: {settings.get('flatten_separator', '_') if settings and settings.get('flatten_json', False) else 'N/A'}
 
 ## 2. 입력 데이터
 - **입력 파일**: {input_filename}
@@ -78,19 +86,32 @@ def generate_report(json_data: list, csv_data: pd.DataFrame, input_filename: str
 """
     return report
 
-def solution(input_filename: str, output_filename: str):
+def solution(input_filename: str, output_filename: str, settings: dict = None):
     """
     JSON 파일을 CSV로 변환하는 함수.
     
     Parameters:
     - input_filename (str): 입력 JSON 파일 경로
     - output_filename (str): 출력 CSV 파일 경로
+    - settings (dict): 변환 설정
+        - flatten_json (bool): JSON 평탄화 여부 (기본값: False)
+        - flatten_separator (str): 평탄화 시 사용할 구분자 (기본값: '_')
     
     Returns:
     - tuple: (저장된 파일 경로, 보고서 내용)
     """
     start_time = time.time()
     print(f"\n[시작] JSON to CSV 변환 작업을 시작합니다.")
+    
+    # 설정 기본값 설정
+    if settings is None:
+        settings = {}
+    should_flatten = settings.get('flatten_json', False)
+    flatten_separator = settings.get('flatten_separator', '_')
+    
+    print(f"- 평탄화 설정: {'활성화' if should_flatten else '비활성화'}")
+    if should_flatten:
+        print(f"- 평탄화 구분자: '{flatten_separator}'")
     
     # JSON 데이터 로드
     print("\n[1/3] JSON 파일을 로드합니다...")
@@ -104,6 +125,22 @@ def solution(input_filename: str, output_filename: str):
     # JSON 데이터 크기 확인
     json_size = os.path.getsize(input_filename)
     print(f"- JSON 파일 크기: {json_size / 1024:.2f} KB")
+    
+    # JSON 평탄화 적용 (설정에 따라)
+    if should_flatten and json_data:
+        print("\n[1.5/3] JSON 데이터를 평탄화합니다...")
+        try:
+            flattened_data = []
+            for item in json_data:
+                if isinstance(item, dict):
+                    flattened_item = flatten_json(item, parent_key='', sep=flatten_separator)
+                    flattened_data.append(flattened_item)
+                else:
+                    flattened_data.append(item)
+            json_data = flattened_data
+            print(f"- 평탄화 완료: {len(json_data)}개 항목")
+        except Exception as e:
+            print(f"- 평탄화 실패, 원본 데이터 사용: {str(e)}")
     
     # DataFrame으로 변환
     print("\n[2/3] JSON을 DataFrame으로 변환합니다...")
@@ -137,6 +174,6 @@ def solution(input_filename: str, output_filename: str):
     
     # 보고서 생성
     report = generate_report(json_data, df, input_filename, output_filename, 
-                           json_size, csv_size, elapsed_time)
+                           json_size, csv_size, elapsed_time, settings)
     
     return output_filename, report
