@@ -83,6 +83,8 @@ if __name__ == '__main__' :
         text_column=settings['text_column'],
         output_filename=local_file_path, 
         new_column=settings.get('new_column'),
+        min_length=settings.get('min_length'),
+        max_length=settings.get('max_length'),
         ignore_words=settings['ignore_words'],
         remove_stopwords=settings['remove_stopwords'], 
         keep_tokenized_column_only=settings['keep_tokenized_column_only']

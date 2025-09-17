@@ -14,6 +14,8 @@ args =\
             'settings': {
                 'text_column': 'text_column',
                 'new_column': 'tokenized_text',
+                'min_length': 1,
+                'max_length': None,
                 'ignore_words': [],
                 'remove_stopwords': True, 
                 'keep_tokenized_column_only': True,
