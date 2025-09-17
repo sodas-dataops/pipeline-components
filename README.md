@@ -173,6 +173,7 @@ spec:
 - [`csv-date-time-formatter`](./csv-date-time-formatter/) - 날짜/시간 포맷 변환
 - [`csv-delete-missing-value`](./csv-delete-missing-value/) - 결측값 삭제
 - [`csv-embedding`](./csv-embedding/) - 텍스트 임베딩 생성
+- [`csv-explode`](./csv-explode/) - 다치속성 컬럼 대상 데이터 확장 전개
 - [`csv-from-parquet`](./csv-from-parquet/) - Parquet에서 CSV 변환
 - [`csv-get-latlon`](./csv-get-latlon/) - 주소에서 위경도 추출
 - [`csv-join`](./csv-join/) - CSV 파일 조인
@@ -180,7 +181,9 @@ spec:
 - [`csv-regex`](./csv-regex/) - 정규표현식 처리
 - [`csv-sort`](./csv-sort/) - 데이터 정렬
 - [`csv-statistic-summary`](./csv-statistic-summary/) - 통계 요약
-- [`csv-tokenize`](./csv-tokenize/) - 텍스트 토큰화
+- [`csv-to-json`](./csv-to-json/) - CSV 데이터를 JSON으로 변환
+- [`csv-tokenize`](./csv-tokenize/) - 텍스트 토큰화 (한국어)
+- [`csv-tokenize-en`](./csv-tokenize-en/) - 텍스트 토큰화 (영어)
 - [`csv-transform`](./csv-transform/) - 데이터 변환
 - [`csv-wordcount`](./csv-wordcount/) - 단어 빈도 계산
 
@@ -194,26 +197,23 @@ spec:
 - [`csv-visualization-wordcloud`](./csv-visualization-wordcloud/) - 워드클라우드 생성
 
 ### JSON 처리
+- [`json-extract`](./json-extract/) - JSON 내의 JSON 추출
 - [`json-merge`](./json-merge/) - JSON 파일 병합
 - [`json-merge-from-directory`](./json-merge-from-directory/) - 디렉토리 내 JSON 병합
 - [`json-to-csv`](./json-to-csv/) - JSON을 CSV로 변환
 - [`json-upload`](./json-upload/) - JSON 파일 업로드
 
 ### 데이터베이스 연동
-- [`postgresql-to-csv`](./postgresql-to-csv/) - PostgreSQL 데이터 추출
 - [`mysql-to-csv`](./mysql-to-csv/) - MySQL 데이터 추출
 - [`dump-mysql-to-csv`](./dump-mysql-to-csv/) - MySQL 전체 테이블 덤프
 - [`dump-mongodb-to-json`](./dump-mongodb-to-json/) - MongoDB 컬렉션 덤프
-- [`postgresql-to-csv`](./postgresql-to-csv/) - PostgreSQL 데이터 추출
 
 ### 실시간 데이터 수집
 - [`mqtt-subscriber`](./mqtt-subscriber/) - MQTT 메시지 구독
 - [`kubernetes-log-collector`](./kubernetes-log-collector/) - Kubernetes 로그 수집
 
 ### 기타 유틸리티
-- [`csv-to-json`](./csv-to-json/) - CSV를 JSON으로 변환
 - [`upload-object-file-to-restapi`](./upload-object-file-to-restapi/) - REST API 파일 업로드
-- [`sodas-append-dataset-to-datasetseries`](./sodas-append-dataset-to-datasetseries/) - 데이터셋 시리즈 추가
 
 ## 구성 구조
 
@@ -223,8 +223,9 @@ spec:
 component/
 ├── config/
 │   └── config.py          # 환경별 설정 정의
+├── core/
+│   └── algorithm_....py   # 핵심 처리 로직
 ├── tmp/                   # 임시 파일 저장소
-├── algorithm.py           # 핵심 처리 로직
 ├── main.py               # 프로그램 진입점
 ├── test.py               # 단위 테스트
 ├── requirements.txt      # Python 의존성
