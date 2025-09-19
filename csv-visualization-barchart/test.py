@@ -7,10 +7,10 @@ if __name__ == '__main__' :
         
     algorithm.solution(
         data=input_data,
-        feature_names='quantity',
+        x_column='category',
+        y_column='value',
         image_file_name='./tmp/test_output_data.png', 
-        bins=9, 
-        # color='green', 
-        # xlabel='Feature Values', 
-        # ylabel='Count'
+        color='green', 
+        xlabel='Category', 
+        ylabel='Value'
     )

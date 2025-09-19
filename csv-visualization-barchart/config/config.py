@@ -12,7 +12,8 @@ args =\
                 'object_path': 'test_input_data.csv',
             },
             'settings': {
-                'feature_name': 'quantity',
+                'x_column': 'category',
+                'y_column': 'value',
             },
             'output1': {
                 'end_point': 'http://object-storage.rook.xxx.xxx.xxx.xxx.traefik.me:xxxxx',

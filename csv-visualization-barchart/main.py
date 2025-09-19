@@ -68,7 +68,7 @@ def delete_object(s3_resource, bucket_name: str, object_path: str):
         raise
 
 if __name__ == '__main__' :
-    print('CSV Visualization Histogram')
+    print('CSV Visualization Bar Chart')
     print('args:', args)
     local_file_path = './tmp/result.png'
 
@@ -83,7 +83,8 @@ if __name__ == '__main__' :
     settings = args['settings']
     image_file_path, report = algorithm.solution(
         input1_data,
-        settings['feature_name'],
+        settings['x_column'],
+        settings['y_column'],
         local_file_path, 
     )
 

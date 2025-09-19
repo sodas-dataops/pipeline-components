@@ -5,9 +5,9 @@ from datetime import datetime
 
 def generate_report(
     df: pd.DataFrame,
-    feature_names: str,
+    x_column: str,
+    y_column: str,
     image_file_name: str,
-    bins: int,
     color: str,
     xlabel: str,
     ylabel: str,
@@ -18,9 +18,9 @@ def generate_report(
     
     Parameters:
     - df (pd.DataFrame): 처리된 DataFrame
-    - feature_names (str): 시각화한 feature의 컬럼명
+    - x_column (str): x축에 사용된 컬럼명
+    - y_column (str): y축에 사용된 컬럼명
     - image_file_name (str): 저장된 이미지 파일 경로
-    - bins (int): 사용된 빈 개수
     - color (str): 사용된 막대 색상
     - xlabel (str): x축 레이블
     - ylabel (str): y축 레이블
@@ -42,17 +42,18 @@ def generate_report(
 - **컬럼 목록**: {', '.join(df.columns)}
 
 ## 3. 시각화 설정
-- **대상 컬럼**: {feature_names}
-- **빈 개수**: {bins}개
+- **X축 컬럼**: {x_column}
+- **Y축 컬럼**: {y_column}
 - **막대 색상**: {color}
-- **X축 레이블**: {xlabel if xlabel else feature_names}
+- **X축 레이블**: {xlabel}
 - **Y축 레이블**: {ylabel}
 
 ## 4. 처리 결과
 - **출력 파일**: {image_file_name}
-- **데이터 범위**: {df[feature_names].min():.2f} ~ {df[feature_names].max():.2f}
-- **평균값**: {df[feature_names].mean():.2f}
-- **중앙값**: {df[feature_names].median():.2f}
+- **X축 고유값 개수**: {df[x_column].nunique()}개
+- **Y축 데이터 범위**: {df[y_column].min():.2f} ~ {df[y_column].max():.2f}
+- **Y축 평균값**: {df[y_column].mean():.2f}
+- **Y축 중앙값**: {df[y_column].median():.2f}
 
 ## 5. 성능 지표
 - **처리 속도**: {len(df) / elapsed_time:.2f} 행/초
@@ -64,18 +65,18 @@ def generate_report(
 """
     return report
 
-def solution(data: object, feature_names: str, image_file_name: str, bins: int = 10, color: str = 'blue', xlabel: str = None, ylabel: str = 'Frequency') -> tuple:
+def solution(data: object, x_column: str, y_column: str, image_file_name: str, color: str = 'blue', xlabel: str = None, ylabel: str = None) -> tuple:
     """
-    CSV 파일에서 특정 feature의 막대 그래프를 생성하여 이미지 파일로 저장하는 함수.
+    CSV 파일에서 두 컬럼을 사용하여 막대 그래프를 생성하여 이미지 파일로 저장하는 함수.
 
     Parameters:
-    - data: CSV 파일 경로
-    - feature_names: 막대 그래프를 생성할 feature의 컬럼명
+    - data: CSV 파일 경로 또는 StringIO 객체
+    - x_column: x축에 사용할 컬럼명 (카테고리)
+    - y_column: y축에 사용할 컬럼명 (수치값)
     - image_file_name: 저장할 이미지 파일 이름
-    - bins: 막대 그래프의 빈 개수 (선택사항, 기본값 10)
     - color: 막대 그래프 막대 색상 (선택사항, 기본값 'blue')
-    - xlabel: x축 레이블 (선택사항)
-    - ylabel: y축 레이블 (선택사항, 기본값 'Frequency')
+    - xlabel: x축 레이블 (선택사항, 기본값은 x_column)
+    - ylabel: y축 레이블 (선택사항, 기본값은 y_column)
     
     Returns:
     - tuple: (이미지 파일 경로, 보고서 내용)
@@ -87,14 +88,26 @@ def solution(data: object, feature_names: str, image_file_name: str, bins: int =
     
     # 막대 그래프 생성
     plt.figure(figsize=(10, 6))
-    plt.hist(dataFile[feature_names], bins=bins, color=color, edgecolor='black')
+    
+    # x축과 y축 데이터 추출
+    x_data = dataFile[x_column]
+    y_data = dataFile[y_column]
+    
+    # 막대 그래프 생성
+    plt.bar(x_data, y_data, color=color, edgecolor='black')
     
     # 축 레이블 설정
-    plt.xlabel(xlabel if xlabel else feature_names)
-    plt.ylabel(ylabel)
+    plt.xlabel(xlabel if xlabel else x_column)
+    plt.ylabel(ylabel if ylabel else y_column)
+    
+    # x축 레이블 회전 (긴 레이블의 경우)
+    plt.xticks(rotation=45, ha='right')
+    
+    # 레이아웃 조정
+    plt.tight_layout()
     
     # 이미지 파일로 저장
-    plt.savefig(image_file_name, dpi=300)
+    plt.savefig(image_file_name, dpi=300, bbox_inches='tight')
     plt.close()
 
     # 소요 시간 계산
@@ -104,12 +117,12 @@ def solution(data: object, feature_names: str, image_file_name: str, bins: int =
     # 보고서 생성
     report = generate_report(
         df=dataFile,
-        feature_names=feature_names,
+        x_column=x_column,
+        y_column=y_column,
         image_file_name=image_file_name,
-        bins=bins,
         color=color,
-        xlabel=xlabel,
-        ylabel=ylabel,
+        xlabel=xlabel if xlabel else x_column,
+        ylabel=ylabel if ylabel else y_column,
         elapsed_time=elapsed_time
     )
 
