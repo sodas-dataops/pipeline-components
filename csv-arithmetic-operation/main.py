@@ -83,6 +83,7 @@ if __name__ == '__main__' :
         args['operands'],
         args['operators'],
         args['column_name'],
+        args.get('strict_mode', True)
     )
     
     # 보고서 저장
