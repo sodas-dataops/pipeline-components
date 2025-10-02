@@ -8,7 +8,7 @@ import pandas as pd
 
 def generate_report(df: pd.DataFrame, subset: list, input_filename: str, output_filename: str,
                   input_size: int, output_size: int, elapsed_time: float,
-                  missing_counts: dict, removed_rows: int) -> str:
+                  missing_counts: dict, removed_rows: int, validation_info: dict = None) -> str:
     """
     작업 보고서를 생성하는 함수.
     
@@ -22,6 +22,7 @@ def generate_report(df: pd.DataFrame, subset: list, input_filename: str, output_
     - elapsed_time (float): 소요 시간 (초)
     - missing_counts (dict): 각 컬럼별 결측값 수
     - removed_rows (int): 제거된 행 수
+    - validation_info (dict): 검증 정보 (경고 메시지 등)
     
     Returns:
     - str: 생성된 보고서 내용 (markdown 형식)
@@ -40,29 +41,64 @@ def generate_report(df: pd.DataFrame, subset: list, input_filename: str, output_
 - **컬럼 수**: {len(df.columns)}개
 - **컬럼 목록**: {', '.join(df.columns)}
 
-## 3. 결측값 분석
+## 3. 데이터 검증 결과
+{f"- **경고**: {validation_info['warnings']}" if validation_info and validation_info.get('warnings') else ""}
+
+## 4. 결측값 분석
 - **처리 모드**: {'전체 컬럼' if not subset else '선택 컬럼'}
 - **처리된 컬럼**: {', '.join(subset) if subset else '모든 컬럼'}
 - **결측값 현황**:
 {chr(10).join([f"- {col}: {count:,}개 ({count/(len(df) + removed_rows)*100:.1f}%)" for col, count in missing_counts.items() if count > 0])}
 
-## 4. 처리 결과
+## 5. 처리 결과
 - **출력 파일**: {output_filename}
 - **파일 크기**: {output_size / 1024:.2f} KB
 - **제거된 행 수**: {removed_rows:,}행
 - **남은 행 수**: {len(df):,}행
 - **제거 비율**: {removed_rows/(len(df) + removed_rows)*100:.1f}%
 
-## 5. 성능 지표
+## 6. 성능 지표
 - **처리 속도**: {input_size / elapsed_time / 1024:.2f} KB/s
 - **압축률**: {(1 - output_size / input_size) * 100:.2f}%
 - **처리 효율**: {(len(df) + removed_rows) / elapsed_time:.2f} 행/초
 
-## 6. 작업 상태
+## 7. 작업 상태
 - **상태**: 성공
 - **처리 결과**: 결측값이 성공적으로 제거됨
 """
     return report
+
+def validate_subset_columns(df: pd.DataFrame, subset: list) -> dict:
+    """
+    subset 컬럼들의 존재 여부를 검증하는 함수.
+    
+    Parameters:
+    - df (pd.DataFrame): 검증할 DataFrame
+    - subset (list): 검증할 컬럼 목록
+    
+    Returns:
+    - dict: 검증 결과 정보
+    """
+    validation_info = {
+        'is_valid': True,
+        'warnings': [],
+        'missing_columns': []
+    }
+    
+    if not subset:
+        return validation_info
+    
+    # 존재하지 않는 컬럼 찾기
+    missing_columns = [col for col in subset if col not in df.columns]
+    
+    if missing_columns:
+        validation_info['is_valid'] = False
+        validation_info['missing_columns'] = missing_columns
+        warning_msg = f"다음 컬럼들이 데이터에 존재하지 않습니다: {', '.join(missing_columns)}"
+        validation_info['warnings'].append(warning_msg)
+        print(f"⚠️  경고: {warning_msg}")
+    
+    return validation_info
 
 def solution(data: object, output_filename: str, subset):
     """
@@ -91,11 +127,28 @@ def solution(data: object, output_filename: str, subset):
     print(f"- 컬럼 목록: {', '.join(df.columns)}")
     
     # 입력 파일 크기 확인
-    input_size = len(data.getvalue().encode('utf-8'))
+    if hasattr(data, 'getvalue'):
+        input_size = len(data.getvalue().encode('utf-8'))
+    elif hasattr(data, 'name'):
+        input_size = os.path.getsize(data.name)
+    else:
+        input_size = 0
     print(f"- 입력 파일 크기: {input_size / 1024:.2f} KB")
     
+    # subset 컬럼 검증
+    print("\n[2/4] subset 컬럼을 검증합니다...")
+    validation_info = validate_subset_columns(df, subset)
+    
+    # 존재하지 않는 컬럼이 있으면 subset에서 제거
+    if validation_info['missing_columns']:
+        print(f"- 존재하지 않는 컬럼을 subset에서 제거합니다: {', '.join(validation_info['missing_columns'])}")
+        subset = [col for col in subset if col in df.columns]
+        if not subset:
+            print("- 모든 지정된 컬럼이 존재하지 않습니다. 모든 컬럼의 결측값을 제거합니다.")
+            subset = None
+    
     # 결측값 분석
-    print("\n[2/3] 결측값을 분석합니다...")
+    print("\n[3/4] 결측값을 분석합니다...")
     if subset:
         missing_counts = df[subset].isnull().sum()
         print("- 각 컬럼별 결측값 수:")
@@ -109,7 +162,7 @@ def solution(data: object, output_filename: str, subset):
                 print(f"  - {col}: {count:,}개 ({count/len(df)*100:.1f}%)")
     
     # 결측값 제거
-    print("\n[3/3] 결측값을 제거합니다...")
+    print("\n[4/4] 결측값을 제거합니다...")
     if not subset:
         print("- 모든 컬럼의 결측값을 제거합니다...")
         df = df.dropna()
@@ -143,6 +196,6 @@ def solution(data: object, output_filename: str, subset):
     report = generate_report(df, subset,
                            data.name if hasattr(data, 'name') else data,
                            output_filename, input_size, output_size,
-                           elapsed_time, missing_counts, removed_rows)
+                           elapsed_time, missing_counts, removed_rows, validation_info)
     
     return output_filename, report
