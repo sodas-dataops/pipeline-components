@@ -70,7 +70,7 @@ def delete_object(s3_resource, bucket_name: str, object_path: str):
 if __name__ == '__main__' :
     print('CSV Visualization Bar Chart')
     print('args:', args)
-    local_file_path = './tmp/result.png'
+    local_file_path = './tmp/result'
 
     input1 = args['input1']
     s3_client_input1 = create_s3_client(input1['end_point'], input1['access_key'], input1['secret_key'])
@@ -81,18 +81,20 @@ if __name__ == '__main__' :
     ) # data read
     
     settings = args['settings']
-    image_file_path, report = algorithm.solution(
+    actual_output_file, report = algorithm.solution(
         input1_data,
         settings['x_column'],
         settings['y_column'],
-        local_file_path, 
+        local_file_path,
+        settings.get('chart_mode', 'image'),
+        settings.get('design_params', {})
     )
 
     output1 = args['output1']
     s3_client_output1 = create_s3_client(output1['end_point'], output1['access_key'], output1['secret_key'])
     put_object(
         s3_resource=s3_client_output1,
-        local_file_path=local_file_path,
+        local_file_path=actual_output_file,
         bucket_name=output1['bucket_name'], 
         object_path=output1['object_path']
     ) # data write
