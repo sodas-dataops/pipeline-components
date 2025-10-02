@@ -7,7 +7,13 @@ from collections import defaultdict
 
 # MultiIndex 컬럼을 평탄화 하는 함수
 def flat_cols(df):
-    df.columns = ['_'.join(x) for x in df.columns.to_flat_index()]
+    """
+    MultiIndex 컬럼을 평탄화하는 함수
+    - MultiIndex가 아닌 경우: 그대로 반환
+    - MultiIndex인 경우: '_'로 연결하여 평탄화
+    """
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = ['_'.join(x) for x in df.columns.to_flat_index()]
     return df
 
 def _trimmed_mean_numpy(x, proportion):
@@ -156,7 +162,6 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
     
     # 통계량 계산
     print("\n[3/4] 통계량을 계산합니다...")
-    print("- 그룹화를 수행합니다...")
     
     # 중복 컬럼 제거 (groupby를 위해)
     unique_input_cols = list(dict.fromkeys(input_cols))  # 순서 유지하면서 중복 제거
@@ -165,11 +170,18 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
         print(f"- 원본: {input_cols}")
         print(f"- 정리됨: {unique_input_cols}")
     
-    grouped = df.groupby(group_by)[unique_input_cols]
-    print(f"- 생성된 그룹 수: {len(grouped.groups)}")
+    # group_by가 비어있으면 전체 데이터를 하나의 그룹으로 처리
+    if not group_by:
+        print("- 그룹화 없이 전체 데이터에 대해 통계를 계산합니다...")
+        grouped = df[unique_input_cols]
+        group_keys = [None]  # 전체 데이터를 하나의 그룹으로 처리
+    else:
+        print("- 그룹화를 수행합니다...")
+        grouped = df.groupby(group_by)[unique_input_cols]
+        group_keys = list(grouped.groups.keys())
+        print(f"- 생성된 그룹 수: {len(group_keys)}")
     
-    # --- (중요) 위치 페어링으로 컬럼별 집계 목록 만들기 ---
-    pairs = list(zip(input_cols, statistics))
+    # --- (중요) 각 컬럼에 대해 모든 통계량을 적용 ---
     basic_agg_map = defaultdict(list)         # pandas 내장/문자열 통계만 넣음
     pct_targets = defaultdict(list)           # percentile을 요청한 (col -> p 리스트)
     tmean_targets = set()                     # trimmed-mean을 요청한 컬럼 집합
@@ -180,32 +192,42 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
 
     # dtype 파악(방어적): 숫자 컬럼엔 수치 통계 허용, 비수치엔 안전 통계만
     numeric_cols = df[unique_input_cols].select_dtypes(include="number").columns.tolist()
+    datetime_cols = df[unique_input_cols].select_dtypes(include=["datetime64", "object"]).columns.tolist()
     non_numeric_cols = [c for c in unique_input_cols if c not in numeric_cols]
+    
+    print(f"- 숫자 컬럼: {numeric_cols}")
+    print(f"- 날짜/문자열 컬럼: {datetime_cols}")
+    print(f"- 비숫자 컬럼: {non_numeric_cols}")
 
-    print("- 통계량 페어링을 분석합니다...")
-    for col, stat in pairs:
-        if stat == "percentile":
-            if percentile_amounts is not None:
-                # 이 컬럼에 대해서만 해당 p들을 계산
-                pct_targets[col].extend(percentile_amounts)
-                print(f"  - {col}: percentile {percentile_amounts}")
-            continue
-        if stat == "trimmed-mean":
-            if trimmed_mean_amounts is not None:
-                tmean_targets.add(col)
-                print(f"  - {col}: trimmed-mean {trimmed_mean_amounts}")
-            continue
+    print("- 각 컬럼에 대해 통계량을 적용합니다...")
+    for col in unique_input_cols:
+        for stat in statistics:
+            if stat == "percentile":
+                if percentile_amounts is not None:
+                    # 이 컬럼에 대해서만 해당 p들을 계산
+                    pct_targets[col].extend(percentile_amounts)
+                    print(f"  - {col}: percentile {percentile_amounts}")
+                continue
+            if stat == "trimmed-mean":
+                if trimmed_mean_amounts is not None:
+                    tmean_targets.add(col)
+                    print(f"  - {col}: trimmed-mean {trimmed_mean_amounts}")
+                continue
 
-        # 나머지는 pandas가 아는 키워드/함수여야 함 → 문자열 키워드만 받는다고 가정
-        if col in numeric_cols and stat in numeric_only | any_dtype:
-            basic_agg_map[col].append(stat)
-            print(f"  - {col}: {stat}")
-        elif col in non_numeric_cols and stat in any_dtype:
-            basic_agg_map[col].append(stat)
-            print(f"  - {col}: {stat}")
-        else:
-            # 부적합 통계는 무시(원하면 경고 로그 출력)
-            print(f"  - {col}: {stat} (부적합 통계로 무시됨)")
+            # 나머지는 pandas가 아는 키워드/함수여야 함 → 문자열 키워드만 받는다고 가정
+            if col in numeric_cols and stat in numeric_only | any_dtype:
+                basic_agg_map[col].append(stat)
+                print(f"  - {col}: {stat}")
+            elif col in datetime_cols and stat in {"min", "max", "first", "last", "count", "size", "nunique"}:
+                # 날짜 컬럼에는 min, max, first, last, count, size, nunique만 허용
+                basic_agg_map[col].append(stat)
+                print(f"  - {col}: {stat}")
+            elif col in non_numeric_cols and stat in any_dtype:
+                basic_agg_map[col].append(stat)
+                print(f"  - {col}: {stat}")
+            else:
+                # 부적합 통계는 무시(원하면 경고 로그 출력)
+                print(f"  - {col}: {stat} (부적합 통계로 무시됨)")
 
     # 1) 기본 집계 (내장 키워드들만)
     print("- 기본 통계량을 계산합니다...")
@@ -214,14 +236,65 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
         for col in basic_agg_map:
             basic_agg_map[col] = list(set(basic_agg_map[col]))  # 중복 제거
         
-        summary_df = (
-            grouped.agg(dict(basic_agg_map))  # 예: {"_id":["count"], "imdb_rating":["mean"], "imdb_votes":["mean","sum"]}
-            .pipe(flat_cols)
-        )
+        if not group_by:
+            # 그룹화 없이 전체 데이터에 대해 통계 계산
+            print(f"- basic_agg_map: {dict(basic_agg_map)}")
+            print(f"- unique_input_cols: {unique_input_cols}")
+            
+            # 더 명확한 집계 방법 사용
+            agg_dict = dict(basic_agg_map)
+            print(f"- agg_dict: {agg_dict}")
+            
+            agg_result = df[unique_input_cols].agg(agg_dict)
+            print(f"- agg_result 타입: {type(agg_result)}")
+            print(f"- agg_result 형태: {agg_result.shape if hasattr(agg_result, 'shape') else 'N/A'}")
+            print(f"- agg_result 컬럼: {list(agg_result.columns) if hasattr(agg_result, 'columns') else 'N/A'}")
+            print(f"- agg_result 인덱스: {list(agg_result.index) if hasattr(agg_result, 'index') else 'N/A'}")
+            
+            if isinstance(agg_result, pd.Series):
+                # Series를 DataFrame으로 변환하고 컬럼명을 올바르게 설정
+                summary_df = agg_result.to_frame().T
+                # Series의 인덱스가 실제 컬럼_통계량 형태이므로 이를 그대로 사용
+                summary_df.columns = agg_result.index
+                print(f"- Series 처리: 컬럼명을 {list(agg_result.index)}로 설정")
+            else:
+                # DataFrame인 경우 처리
+                print(f"- DataFrame 처리 전: {list(agg_result.columns)}")
+                print(f"- DataFrame 인덱스: {list(agg_result.index)}")
+                
+                if isinstance(agg_result.columns, pd.MultiIndex):
+                    # MultiIndex 컬럼인 경우 평탄화
+                    summary_df = agg_result.pipe(flat_cols)
+                    print(f"- MultiIndex 평탄화 후: {list(summary_df.columns)}")
+                else:
+                    # 단일 컬럼인 경우 (그룹화 없이 계산할 때)
+                    # 인덱스와 컬럼을 전치하고 컬럼명을 수동으로 생성
+                    summary_df = agg_result.T
+                    print(f"- 전치 후 shape: {summary_df.shape}")
+                    print(f"- 전치 후 컬럼: {list(summary_df.columns)}")
+                    
+                    # 컬럼명을 컬럼_통계량 형태로 생성
+                    new_columns = []
+                    for col in agg_result.columns:
+                        for stat in agg_result.index:
+                            new_columns.append(f"{col}_{stat}")
+                    summary_df.columns = new_columns
+                    print(f"- 최종 컬럼명 설정 후: {list(summary_df.columns)}")
+            
+            print(f"- summary_df 컬럼: {list(summary_df.columns)}")
+        else:
+            # 그룹화된 데이터에 대해 통계 계산
+            summary_df = (
+                grouped.agg(dict(basic_agg_map))  # 예: {"_id":["count"], "imdb_rating":["mean"], "imdb_votes":["mean","sum"]}
+                .pipe(flat_cols)
+            )
         print(f"- 계산된 기본 통계량: {', '.join(summary_df.columns)}")
     else:
         # 기본 통계량이 없으면 빈 DataFrame 생성
-        summary_df = pd.DataFrame(index=grouped.groups.keys())
+        if not group_by:
+            summary_df = pd.DataFrame()
+        else:
+            summary_df = pd.DataFrame(index=group_keys)
 
     # 2) percentile: 요청된 컬럼에 대해서만, 요청된 p들만
     if pct_targets:
@@ -233,7 +306,18 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
                 name = f"{col}_q{int(p*100)}"
                 pct_aggs[name] = (col, lambda s, p=p: s.quantile(p))
         if pct_aggs:
-            pct_df = df.groupby(group_by).agg(**pct_aggs)
+            if not group_by:
+                # 그룹화 없이 전체 데이터에 대해 백분위수 계산
+                pct_result = df[unique_input_cols].agg(**pct_aggs)
+                if isinstance(pct_result, pd.Series):
+                    pct_df = pct_result.to_frame().T
+                    # Series의 인덱스가 실제 컬럼명이므로 이를 그대로 사용
+                    pct_df.columns = pct_result.index
+                else:
+                    pct_df = pct_result
+            else:
+                # 그룹화된 데이터에 대해 백분위수 계산
+                pct_df = df.groupby(group_by).agg(**pct_aggs)
             summary_df = pd.concat([summary_df, pct_df], axis=1)
             print(f"- 추가된 백분위수: {', '.join(pct_df.columns)}")
 
@@ -248,7 +332,18 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
             # Numpy만으로 구현한 버전:
             tmean_aggs[name] = (col, lambda s: _trimmed_mean_numpy(s, trimmed_mean_amounts))
         if tmean_aggs:
-            tmean_df = df.groupby(group_by).agg(**tmean_aggs)
+            if not group_by:
+                # 그룹화 없이 전체 데이터에 대해 트리밍된 평균 계산
+                tmean_result = df[unique_input_cols].agg(**tmean_aggs)
+                if isinstance(tmean_result, pd.Series):
+                    tmean_df = tmean_result.to_frame().T
+                    # Series의 인덱스가 실제 컬럼명이므로 이를 그대로 사용
+                    tmean_df.columns = tmean_result.index
+                else:
+                    tmean_df = tmean_result
+            else:
+                # 그룹화된 데이터에 대해 트리밍된 평균 계산
+                tmean_df = df.groupby(group_by).agg(**tmean_aggs)
             summary_df = pd.concat([summary_df, tmean_df], axis=1)
             print(f"- 추가된 트리밍된 평균: {', '.join(tmean_df.columns)}")
     
@@ -261,7 +356,10 @@ def solution(data: object, output_filename: str, input_cols, group_by, statistic
     
     print(f"\n[요약]")
     print(f"- 처리된 행 수: {len(df)}")
-    print(f"- 그룹 수: {len(grouped.groups)}")
+    if not group_by:
+        print(f"- 그룹 수: 1 (전체 데이터)")
+    else:
+        print(f"- 그룹 수: {len(group_keys)}")
     print(f"- 계산된 통계량 수: {len(summary_df.columns)}")
     print(f"- 소요 시간: {elapsed_time:.2f}초")
     print(f"- 저장 경로: {output_filename}")
