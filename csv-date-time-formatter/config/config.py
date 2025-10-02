@@ -33,6 +33,7 @@ args =\
                 'bucket_name': '',
                 'object_path': '',
             },
+            'delete_input': False,
         },
         'production': {
             'input1': json.loads(os.environ['INPUT1']) if 'INPUT1' in os.environ else '',
@@ -43,5 +44,6 @@ args =\
             'out_format': os.environ['OUT_FORMAT'] if 'OUT_FORMAT' in os.environ else '%Y/%m/%d',
             'output1': json.loads(os.environ['OUTPUT1']) if 'OUTPUT1' in os.environ else '',
             'task_report': json.loads(os.environ['TASK_REPORT']) if 'TASK_REPORT' in os.environ else '',
+            'delete_input': os.getenv('DELETE_INPUT', 'false').lower() == 'true',
         }
     }

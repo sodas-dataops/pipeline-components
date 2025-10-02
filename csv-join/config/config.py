@@ -42,6 +42,7 @@ args =\
                 'bucket_name': '',
                 'object_path': '',
             },
+            'delete_input': False,
         },
         'production': {
             'left_table': json.loads(os.environ['LEFT_TABLE']) if 'LEFT_TABLE' in os.environ else '',
@@ -54,5 +55,6 @@ args =\
             'sort': json.loads(os.environ['SORT'].lower()) if 'SORT' in os.environ else True,
             'result_table': json.loads(os.environ['RESULT_TABLE']) if 'RESULT_TABLE' in os.environ else '',
             'task_report': json.loads(os.environ['TASK_REPORT']) if 'TASK_REPORT' in os.environ else '',
+            'delete_input': os.getenv('DELETE_INPUT', 'false').lower() == 'true',
         }
     }

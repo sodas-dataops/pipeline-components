@@ -28,6 +28,7 @@ args =\
                 'bucket_name': 'bucket01',
                 'object_path': 'dir/report.md',
             },
+            'delete_input': False,
         },
         'production': {
             'input1': json.loads(os.environ['INPUT1']) if 'INPUT1' in os.environ else '',
@@ -36,5 +37,6 @@ args =\
             'column_name': os.environ['COLUMN_NAME'] if 'COLUMN_NAME' in os.environ else '',
             'output1': json.loads(os.environ['OUTPUT1']) if 'OUTPUT1' in os.environ else '',
             'task_report': json.loads(os.environ['TASK_REPORT']) if 'TASK_REPORT' in os.environ else '',
+            'delete_input': os.environ.get('DELETE_INPUT', 'false').lower() == 'true',
         }
     }

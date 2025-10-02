@@ -36,6 +36,15 @@ def put_file(s3_resource, local_path: str, bucket_name: str, object_path: str):
         print(f"Error uploading {local_path}: {e}")
         raise
 
+def delete_file(s3_resource, bucket_name: str, object_path: str):
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        obj.delete()
+        print(f"Deleted {object_path}")
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
+        print(f"Error deleting {object_path}: {e}")
+        raise
+
 if __name__ == '__main__' :
     print("Cosine Similarity Matcher")
     print('args:', args)
@@ -84,6 +93,11 @@ if __name__ == '__main__' :
 
     # 결과 파일 업로드
     put_file(s3_o, result_path, args['output1']['bucket_name'], args['output1']['object_path'])
-    
+
     # 보고서 업로드
     put_file(s3_o, report_path, args['task_report']['bucket_name'], args['task_report']['object_path'])
+
+    # 입력 파일 삭제
+    if args['delete_input']:
+        delete_file(s3_q, args['query_embeddings_data']['bucket_name'], args['query_embeddings_data']['object_path'])
+        delete_file(s3_c, args['candidate_embeddings_data']['bucket_name'], args['candidate_embeddings_data']['object_path'])

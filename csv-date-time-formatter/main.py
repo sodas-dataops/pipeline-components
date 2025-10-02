@@ -49,6 +49,15 @@ def put_object(
         print(f'Failed to upload {local_file_path} to {bucket_name}/{object_path}: {e}')
         raise
 
+def delete_object(s3_resource, bucket_name: str, object_path: str):
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        obj.delete()
+        print(f"Successfully deleted object: {bucket_name}/{object_path}")
+    except boto3.exceptions.Boto3Error as e:
+        print(f'Failed to delete {bucket_name}/{object_path}: {e}')
+        raise
+
 if __name__ == '__main__' :
     print('CSV Date Time Formatter')
     print('args:', args)
@@ -101,3 +110,11 @@ if __name__ == '__main__' :
         bucket_name=task_report['bucket_name'],
         object_path=task_report['object_path']
     )
+
+    # 입력 파일 삭제
+    if args['delete_input']:
+        delete_object(
+            s3_resource=s3_client_input1,
+            bucket_name=input1['bucket_name'],
+            object_path=input1['object_path']
+        )

@@ -39,6 +39,7 @@ args = {
             'bucket_name': 'bucket01',
             'object_path': 'dir01/task_report.md',
         },
+        'delete_input': False,
     },
     'production': {
         'query_embeddings_data': json.loads(os.environ['QUERY_EMBEDDINGS_DATA']) if 'QUERY_EMBEDDINGS_DATA' in os.environ else '',
@@ -46,5 +47,6 @@ args = {
         'settings': json.loads(os.environ['SETTINGS']) if 'SETTINGS' in os.environ else {},
         'output1': json.loads(os.environ['OUTPUT1']) if 'OUTPUT1' in os.environ else '',
         'task_report': json.loads(os.environ['TASK_REPORT']) if 'TASK_REPORT' in os.environ else '',
+        'delete_input': os.getenv('DELETE_INPUT', 'false').lower() == 'true',
     }
 }

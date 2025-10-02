@@ -52,6 +52,15 @@ def save_report(
         print(f'Failed to upload report to {bucket_name}/{object_path}: {e}')
         raise
 
+def delete_object(s3_resource, bucket_name: str, object_path: str):
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        obj.delete()
+        print(f'Successfully deleted {bucket_name}/{object_path}')
+    except (boto3.exceptions.Boto3Error, KeyError) as e:
+        print(f'Failed to delete {bucket_name}/{object_path}: {e}')
+        raise
+
 if __name__ == '__main__':
     print('CSV from Parquet Converter')
     print('args:', args)
@@ -88,3 +97,10 @@ if __name__ == '__main__':
         bucket_name=task_report['bucket_name'],
         object_path=task_report['object_path']
     )
+
+    if args['delete_input']:
+        delete_object(
+            s3_resource=s3_client_input1,
+            bucket_name=input1['bucket_name'],
+            object_path=input1['object_path']
+        )
