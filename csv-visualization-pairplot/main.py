@@ -1,97 +1,118 @@
 import os
-import requests
-import re
-import json
-from minio import Minio
+import boto3
+from io import StringIO
 from config.config import args
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+from core import algorithm_csv_visualization_pairplot as algorithm
 
 env = 'development' if not 'APP_ENV' in os.environ else os.environ['APP_ENV']
 args = args[env]
+    
 
-# Get access token via refresh_token.
-def get_access_token (base_url, user_name, refresh_token):
-    url='http://' + base_url + '/api/v1/gateway/authentication/user/refreshUser'
-    res = requests.post(url,
-        data={'id': user_name, 'refreshToken': refresh_token})
-    return json.loads(res.content.decode('ascii'))['accessToken']
+def create_s3_client(rook_ceph_base_url, access_key, secret_key):
+    return boto3.resource(
+        's3',
+        endpoint_url=rook_ceph_base_url,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        use_ssl=False,
+        verify=False
+    )
 
-# Download data file.
-def download_data_file (base_url, access_token, storage_id, bucket_name, object_path, file_name):
-    url = 'http://' + base_url + '/api/v1/devops/development/environment/minio/object/download'
-    params = {
-        'storageId': storage_id,
-        'bucketName': bucket_name,
-        'objectPath': object_path
-    }
-    headers = {
-        'Accept' : 'text/csv; charset=utf-8',
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Authorization': 'Bearer ' + access_token
-    }
-    with open('.tmp/' + file_name, "wb") as file:
-        res = requests.get(url, headers=headers, params=params)
-        file.write(res.content)
-        print('The file downloads successfully.')
+def get_object(
+        s3_resource,
+        bucket_name: str,
+        object_path: str
+    ) -> bytes:
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        data = obj.get()
+        content = data['Body'].read().decode('utf-8')
 
-# Upload to MinIO.
-def get_connection (base_url, access_token, storage_id):
-    url = 'http://' + base_url + '/api/v1/devops/development/environment/get'
-    params = {
-        'id': storage_id
-    }
-    headers = {
-        'accept': 'application/json', 
-        'Authorization': 'Bearer ' + access_token
-    }
-    res = requests.get(url, headers=headers, params=params)
-    if res.status_code != 200:
-        raise Exception('Unauthorized. Cannot access API.')
-    storage = json.loads(res.content.decode('ascii'))
-    connection = { # to be corrected
-        'end_point': [o['host'] for o in storage['sandbox']['ingress'] if o['servicePort'] == 9000][0],
-        'port': [o['clusterAccessPort'] for o in storage['sandbox']['ingress'] if o['servicePort'] == 9000][0],
-        'use_ssl': False,
-        'access_key': [o['value'] for o in storage['config']['environments'] if o['name'] == 'MINIO_ACCESS_KEY'][0],
-        'secret_key': [o['value'] for o in storage['config']['environments'] if o['name'] == 'MINIO_SECRET_KEY'][0]    }
-    return connection
+        print(f"Successfully retrieved object: {object_path}")
+        return StringIO(content)
+    except (boto3.exceptions.Boto3Error, KeyError, UnicodeDecodeError) as e:
+        print(f'Failed to download from {bucket_name}/{object_path}: {e}')
+        raise
 
-def upload_data_file (minio_client, bucket_name, object_path, file_name):
-    minio_client.fput_object(bucket_name, object_path, '.tmp/' + file_name)
-    print('The file uploads successfully.')
+def put_object(
+        s3_resource,
+        local_file_path: str,
+        bucket_name: str,
+        object_path: str
+    ):
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        obj.upload_file(local_file_path)
+        
+        print(f'Successfully uploaded {local_file_path} to {bucket_name}/{object_path}')
+    except (boto3.exceptions.Boto3Error, FileNotFoundError, PermissionError) as e:
+        print(f'Failed to upload {local_file_path} to {bucket_name}/{object_path}: {e}')
+        raise
 
-data_file_name = 'data.csv'
-image_file_name = 'fig.png'
+def save_report(s3_resource, report_content: str, bucket_name: str, object_path: str):
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        obj.put(Body=report_content.encode('utf-8'))
+        print(f'Successfully uploaded report to {bucket_name}/{object_path}')
+    except (boto3.exceptions.Boto3Error, UnicodeEncodeError) as e:
+        print(f'Failed to upload report to {bucket_name}/{object_path}: {e}')
+        raise
 
-download_data_file(
-    base_url=args['input1']['base_url'], 
-    access_token=get_access_token(args['input1']['base_url'], args['input1']['user_name'], args['input1']['refresh_token']), 
-    storage_id=args['input1']['storage_id'], 
-    bucket_name=args['input1']['bucket_name'], 
-    object_path=args['input1']['object_path'], 
-    file_name=data_file_name)
+def delete_object(s3_resource, bucket_name: str, object_path: str):
+    try:
+        obj = s3_resource.Object(bucket_name, object_path)
+        obj.delete()
+        print(f"Successfully deleted object: {bucket_name}/{object_path}")
+    except boto3.exceptions.Boto3Error as e:
+        print(f'Failed to delete {bucket_name}/{object_path}: {e}')
+        raise
 
-dataFile = pd.read_csv('.tmp/' + data_file_name)
+if __name__ == '__main__' :
+    print('CSV Visualization Pairplot')
+    print('args:', args)
+    local_file_path = './tmp/result'
 
-feature_names = args['feature_names']
-target_name = args['target_name']
-df = pd.DataFrame(data=dataFile[feature_names], columns=feature_names)
-df['target'] = dataFile[[target_name]]
+    input1 = args['input1']
+    s3_client_input1 = create_s3_client(input1['end_point'], input1['access_key'], input1['secret_key'])
+    input1_data = get_object(
+        s3_resource=s3_client_input1,
+        bucket_name=input1['bucket_name'],
+        object_path=input1['object_path']
+    ) # data read
+    
+    settings = args['settings']
+    actual_output_file, report = algorithm.solution(
+        data=input1_data,
+        feature_names=settings['feature_names'],
+        target_name=settings['target_name'],
+        output_file_name=local_file_path,
+        chart_mode=settings.get('chart_mode', 'image'),
+        design_params=settings.get('design_params', {})
+    )
 
-x_data = df.iloc[:, :-1]
-y_data = df.iloc[:, [-1]]
+    output1 = args['output1']
+    s3_client_output1 = create_s3_client(output1['end_point'], output1['access_key'], output1['secret_key'])
+    put_object(
+        s3_resource=s3_client_output1,
+        local_file_path=actual_output_file,
+        bucket_name=output1['bucket_name'], 
+        object_path=output1['object_path']
+    ) # data write
 
-sns.pairplot(df, hue="target", height=3)
-plt.savefig('.tmp/' + image_file_name, dpi=300)
+    # Save report
+    task_report = args['task_report']
+    s3_client_task_report = create_s3_client(task_report['end_point'], task_report['access_key'], task_report['secret_key'])
+    save_report(
+        s3_resource=s3_client_task_report,
+        report_content=report,
+        bucket_name=task_report['bucket_name'],
+        object_path=task_report['object_path']
+    )
 
-connection_info = get_connection(
-    base_url=args['output1']['base_url'],
-    access_token=get_access_token(args['output1']['base_url'], args['output1']['user_name'], args['output1']['refresh_token']),
-    storage_id=args['output1']['storage_id']
-)
-minio_client = Minio(endpoint=connection_info['end_point']+':'+str(connection_info['port']), secure=connection_info['use_ssl'], access_key=connection_info['access_key'], secret_key=connection_info['secret_key'])
-upload_data_file(minio_client, args['output1']['bucket_name'], args['output1']['object_path'], image_file_name)
+    # Optionally delete input file
+    if args['delete_input']:
+        delete_object(
+            s3_resource=s3_client_input1,
+            bucket_name=input1['bucket_name'],
+            object_path=input1['object_path']
+        )
