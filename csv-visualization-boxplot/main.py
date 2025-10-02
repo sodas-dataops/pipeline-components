@@ -70,7 +70,7 @@ def delete_object(s3_resource, bucket_name: str, object_path: str):
 if __name__ == '__main__' :
     print('CSV Visualization Boxplot')
     print('args:', args)
-    local_file_path = './tmp/result.png'
+    local_file_path = './tmp/result'
 
     input1 = args['input1']
     s3_client_input1 = create_s3_client(input1['end_point'], input1['access_key'], input1['secret_key'])
@@ -81,20 +81,20 @@ if __name__ == '__main__' :
     ) # data read
 
     settings = args['settings']
-    image_file_path, report = algorithm.solution(
+    actual_output_file, report = algorithm.solution(
         data=input1_data,
         group_by_column=settings['group_by_column'],
         value_column=settings['value_column'],
-        image_file_name=local_file_path, 
-        title=settings['title'],
-        ylabel=settings['ylabel']
+        output_file_name=local_file_path,
+        chart_mode=settings.get('chart_mode', 'image'),
+        design_params=settings.get('design_params', {})
     )
 
     output1 = args['output1']
     s3_client_output1 = create_s3_client(output1['end_point'], output1['access_key'], output1['secret_key'])
     put_object(
         s3_resource=s3_client_output1,
-        local_file_path=local_file_path,
+        local_file_path=actual_output_file,
         bucket_name=output1['bucket_name'], 
         object_path=output1['object_path']
     ) # data write
