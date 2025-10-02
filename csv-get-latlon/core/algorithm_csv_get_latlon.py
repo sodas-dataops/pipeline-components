@@ -11,9 +11,6 @@ from datetime import datetime
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 API_KEYS = [
-    "71EB80C0-C5D7-3AE2-BF88-11E144C33D04",
-    "BB583936-81AE-3364-A989-41109E1128F8",
-    "13646E86-9FC2-34B2-8499-E0DDC0E91DD9"
 ]
 
 def generate_report(
@@ -27,7 +24,8 @@ def generate_report(
     total_addresses: int,
     successful_conversions: int,
     failed_conversions: int,
-    cache_hits: int
+    cache_hits: int,
+    validation_info: dict = None
 ) -> str:
     """
     주소-좌표 변환 작업 보고서를 생성하는 함수.
@@ -44,6 +42,7 @@ def generate_report(
     - successful_conversions (int): 성공적으로 변환된 주소 수
     - failed_conversions (int): 변환 실패한 주소 수
     - cache_hits (int): 캐시에서 찾은 주소 수
+    - validation_info (dict): 검증 정보 (경고 메시지 등)
     
     Returns:
     - str: 생성된 보고서 내용 (markdown 형식)
@@ -61,27 +60,70 @@ def generate_report(
 - **컬럼 수**: {len(df.columns)}개
 - **컬럼 목록**: {', '.join(df.columns)}
 
-## 3. 변환 설정
+## 3. 데이터 검증 결과
+{f"- **경고**: {validation_info['warnings']}" if validation_info and validation_info.get('warnings') else ""}
+
+## 4. 변환 설정
 - **주소 컬럼**: {address_column}
 - **위도 컬럼**: {latitude_column}
 - **경도 컬럼**: {longitude_column}
 
-## 4. 처리 결과
+## 5. 처리 결과
 - **출력 파일**: {output_filename}
 - **총 처리 주소**: {total_addresses:,}개
 - **성공 변환**: {successful_conversions:,}개 ({successful_conversions/total_addresses*100:.1f}%)
 - **실패 변환**: {failed_conversions:,}개 ({failed_conversions/total_addresses*100:.1f}%)
 - **캐시 히트**: {cache_hits:,}개 ({cache_hits/total_addresses*100:.1f}%)
 
-## 5. 성능 지표
+## 6. 성능 지표
 - **처리 속도**: {total_addresses / elapsed_time:.2f} 주소/초
 - **API 호출 수**: {successful_conversions - cache_hits:,}회
 
-## 6. 작업 상태
+## 7. 작업 상태
 - **상태**: 성공
 - **처리 결과**: 주소가 성공적으로 좌표로 변환됨
 """
     return report
+
+def validate_columns(df: pd.DataFrame, address_column: str, latitude_column: str, longitude_column: str) -> dict:
+    """
+    컬럼들의 존재 여부를 검증하는 함수.
+    
+    Parameters:
+    - df (pd.DataFrame): 검증할 DataFrame
+    - address_column (str): 주소 컬럼명
+    - latitude_column (str): 위도 컬럼명
+    - longitude_column (str): 경도 컬럼명
+    
+    Returns:
+    - dict: 검증 결과 정보
+    """
+    validation_info = {
+        'is_valid': True,
+        'warnings': [],
+        'missing_columns': []
+    }
+    
+    # 주소 컬럼 존재 여부 확인
+    if address_column not in df.columns:
+        validation_info['is_valid'] = False
+        validation_info['missing_columns'].append(address_column)
+        warning_msg = f"주소 컬럼 '{address_column}'이 데이터에 존재하지 않습니다."
+        validation_info['warnings'].append(warning_msg)
+        print(f"⚠️  경고: {warning_msg}")
+    
+    # 위도/경도 컬럼이 이미 존재하는지 확인
+    if latitude_column in df.columns:
+        warning_msg = f"위도 컬럼 '{latitude_column}'이 이미 존재합니다. 기존 데이터가 덮어쓰여집니다."
+        validation_info['warnings'].append(warning_msg)
+        print(f"⚠️  경고: {warning_msg}")
+    
+    if longitude_column in df.columns:
+        warning_msg = f"경도 컬럼 '{longitude_column}'이 이미 존재합니다. 기존 데이터가 덮어쓰여집니다."
+        validation_info['warnings'].append(warning_msg)
+        print(f"⚠️  경고: {warning_msg}")
+    
+    return validation_info
 
 def get_coordinates_vworld(address):
     """
@@ -165,18 +207,33 @@ def solution(data: object, address_column: str, latitude_column_name: str = 'lat
     
     # CSV 데이터 로드
     dataFile = pd.read_csv(data)
+    print(f"데이터 로드 완료: {len(dataFile)}행, {len(dataFile.columns)}개 컬럼")
+    print(f"컬럼 목록: {', '.join(dataFile.columns)}")
+
+    # 컬럼 검증
+    print("\n[1/4] 컬럼을 검증합니다...")
+    validation_info = validate_columns(dataFile, address_column, latitude_column_name, longitude_column_name)
+    
+    # 주소 컬럼이 존재하지 않으면 에러 발생
+    if not validation_info['is_valid']:
+        raise ValueError(f"필수 컬럼이 존재하지 않습니다: {', '.join(validation_info['missing_columns'])}")
 
     # 위도와 경도 컬럼 추가
+    print("\n[2/4] 위도와 경도 컬럼을 추가합니다...")
     dataFile[latitude_column_name] = None
     dataFile[longitude_column_name] = None
 
     # 캐시 파일 로드
+    print("\n[3/4] 캐시 파일을 로드합니다...")
     cache_file = 'address_cache.csv'
     address_cache = {}
     if os.path.exists(cache_file):
         cache_df = pd.read_csv(cache_file)
         for _, row in cache_df.iterrows():
             address_cache[row['work_location']] = (row['latitude'], row['longitude'])
+        print(f"캐시 파일 로드 완료: {len(address_cache)}개 주소")
+    else:
+        print("캐시 파일이 존재하지 않습니다. 새로 생성합니다.")
 
     # 통계 변수 초기화
     total_addresses = 0
@@ -185,6 +242,7 @@ def solution(data: object, address_column: str, latitude_column_name: str = 'lat
     cache_hits = 0
 
     # 각 주소에 대해 위도와 경도 추출
+    print("\n[4/4] 주소-좌표 변환을 수행합니다...")
     for idx, row in dataFile.iterrows():
         address = row[address_column]
         if not address or pd.isna(address):
@@ -227,7 +285,8 @@ def solution(data: object, address_column: str, latitude_column_name: str = 'lat
         total_addresses=total_addresses,
         successful_conversions=successful_conversions,
         failed_conversions=failed_conversions,
-        cache_hits=cache_hits
+        cache_hits=cache_hits,
+        validation_info=validation_info
     )
     
     return output_file, report
