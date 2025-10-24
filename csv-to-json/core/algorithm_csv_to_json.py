@@ -23,6 +23,10 @@ def generate_report(
     Returns:
     - str: 생성된 보고서 내용 (markdown 형식)
     """
+    # NaN 값 개수 계산
+    nan_count = df.isnull().sum().sum()
+    total_cells = len(df) * len(df.columns)
+    
     report = f"""# CSV to JSON 변환 작업 보고서
 
 ## 1. 작업 개요
@@ -42,13 +46,20 @@ def generate_report(
 - **JSON 키 수**: {len(df.columns)}개
 - **JSON 키 목록**: {', '.join(df.columns)}
 
-## 4. 성능 지표
+## 4. 데이터 품질
+- **빈 값(NaN) 개수**: {nan_count:,}개
+- **전체 셀 수**: {total_cells:,}개
+- **빈 값 비율**: {(nan_count / total_cells * 100):.2f}%
+- **NaN 처리**: null로 변환됨 (JSON 표준 준수)
+
+## 5. 성능 지표
 - **처리 속도**: {len(df) / elapsed_time:.2f} 행/초
 - **메모리 사용량**: {df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB
 
-## 5. 작업 상태
+## 6. 작업 상태
 - **상태**: 성공
 - **처리 결과**: CSV 파일이 성공적으로 JSON으로 변환됨
+- **JSON 유효성**: 모든 NaN 값이 null로 변환되어 JSON 파싱 오류 방지
 """
     return report
 
@@ -67,6 +78,9 @@ def solution(input_data: object, output_file: str) -> tuple:
     
     # CSV 데이터 로드
     data = pd.read_csv(input_data)
+
+    # NaN 값을 null로 변환 (JSON 표준 준수)
+    data = data.where(pd.notnull(data), None)
 
     # JSON으로 변환
     json_data = data.to_dict(orient='records')
