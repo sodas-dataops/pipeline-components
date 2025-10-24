@@ -18,12 +18,29 @@ def clean_text(text):
         return text
     return re.sub(r'\s+', ' ', text.strip())
 
-def flatten_json(nested_json, parent_key='', sep='_'):
-    """중첩된 JSON 구조를 평탄화합니다."""
+def flatten_json(nested_json, parent_key='', sep='_', preserve_keys=None):
+    """중첩된 JSON 구조를 평탄화합니다.
+
+    Parameters:
+    - nested_json: 평탄화할 JSON 객체
+    - parent_key: 부모 키 (재귀 호출 시 사용)
+    - sep: 키 구분자
+    - preserve_keys: 평탄화하지 않고 보존할 키 목록 (예: ['tier_and_details'])
+    """
+    if preserve_keys is None:
+        preserve_keys = []
+
     items = []
     for k, v in nested_json.items():
         new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, dict):
+
+        # preserve_keys에 포함된 키는 평탄화하지 않고 문자열로 변환
+        if k in preserve_keys:
+            if isinstance(v, (dict, list)):
+                items.append((new_key, json.dumps(v, ensure_ascii=False)))
+            else:
+                items.append((new_key, clean_text(str(v))))
+        elif isinstance(v, dict):
             items.extend(flatten_json(v, new_key, sep=sep).items())
         elif isinstance(v, list):
             # 리스트는 문자열로 변환
@@ -51,6 +68,8 @@ def generate_report(json_data: list, csv_data: pd.DataFrame, input_filename: str
     Returns:
     - str: 생성된 보고서 내용 (markdown 형식)
     """
+    preserve_keys = settings.get('preserve_keys', []) if settings else []
+
     report = f"""# JSON to CSV 변환 작업 보고서
 
 ## 1. 작업 개요
@@ -59,6 +78,7 @@ def generate_report(json_data: list, csv_data: pd.DataFrame, input_filename: str
 - **소요 시간**: {elapsed_time:.2f}초
 - **평탄화 설정**: {'활성화' if settings and settings.get('flatten_json', False) else '비활성화'}
 - **평탄화 구분자**: {settings.get('flatten_separator', '_') if settings and settings.get('flatten_json', False) else 'N/A'}
+- **보존 키**: {', '.join(preserve_keys) if preserve_keys else '없음'}
 
 ## 2. 입력 데이터
 - **입력 파일**: {input_filename}
@@ -96,6 +116,7 @@ def solution(input_filename: str, output_filename: str, settings: dict = None):
     - settings (dict): 변환 설정
         - flatten_json (bool): JSON 평탄화 여부 (기본값: False)
         - flatten_separator (str): 평탄화 시 사용할 구분자 (기본값: '_')
+        - preserve_keys (list): 평탄화하지 않고 보존할 키 목록 (기본값: [])
     
     Returns:
     - tuple: (저장된 파일 경로, 보고서 내용)
@@ -108,10 +129,14 @@ def solution(input_filename: str, output_filename: str, settings: dict = None):
         settings = {}
     should_flatten = settings.get('flatten_json', False)
     flatten_separator = settings.get('flatten_separator', '_')
-    
+    preserve_keys = settings.get('preserve_keys', [])
+
     print(f"- 평탄화 설정: {'활성화' if should_flatten else '비활성화'}")
     if should_flatten:
         print(f"- 평탄화 구분자: '{flatten_separator}'")
+        if preserve_keys:
+            print(f"- 보존 키: {', '.join(preserve_keys)}")
+
     
     # JSON 데이터 로드
     print("\n[1/3] JSON 파일을 로드합니다...")
@@ -133,7 +158,7 @@ def solution(input_filename: str, output_filename: str, settings: dict = None):
             flattened_data = []
             for item in json_data:
                 if isinstance(item, dict):
-                    flattened_item = flatten_json(item, parent_key='', sep=flatten_separator)
+                    flattened_item = flatten_json(item, parent_key='', sep=flatten_separator, preserve_keys=preserve_keys)
                     flattened_data.append(flattened_item)
                 else:
                     flattened_data.append(item)

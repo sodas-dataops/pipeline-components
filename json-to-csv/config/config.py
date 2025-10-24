@@ -15,6 +15,7 @@ args = \
             'settings': {
                 'flatten_json': False,  # JSON 평탄화 여부 (기본값: False)
                 'flatten_separator': '_',  # 평탄화 시 사용할 구분자
+                'preserve_keys': [],  # 평탄화하지 않고 보존할 키 목록 (기본값: [])
             },
             'output1': {
                 'type': 'ceph',
