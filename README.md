@@ -167,33 +167,61 @@ spec:
 
 ### CSV 기반 연산
 - [`csv-arithmetic-operation`](./csv-arithmetic-operation/) - 산술 연산 수행
+- [`csv-categorical-encoding`](./csv-categorical-encoding/) - 범주형 데이터 인코딩
 - [`csv-change-column-name`](./csv-change-column-name/) - 컬럼명 변경
+- [`csv-cleaning`](./csv-cleaning/) - 데이터 정제
+- [`csv-cluster-sampling`](./csv-cluster-sampling/) - 클러스터 샘플링
 - [`csv-column-concat`](./csv-column-concat/) - 컬럼 결합
+- [`csv-coordinate-transform`](./csv-coordinate-transform/) - 좌표 변환
+- [`csv-coordinate-validation`](./csv-coordinate-validation/) - 좌표 유효성 검증
 - [`csv-cosine-similarity`](./csv-cosine-similarity/) - 코사인 유사도 계산
+- [`csv-data-profiling`](./csv-data-profiling/) - 데이터 프로파일링
+- [`csv-data-quality-validation`](./csv-data-quality-validation/) - 데이터 품질 검증
 - [`csv-date-time-formatter`](./csv-date-time-formatter/) - 날짜/시간 포맷 변환
+- [`csv-deduplication`](./csv-deduplication/) - 중복 제거
 - [`csv-delete-missing-value`](./csv-delete-missing-value/) - 결측값 삭제
+- [`csv-distance-matrix`](./csv-distance-matrix/) - 거리 행렬 계산
+- [`csv-distribution-transform`](./csv-distribution-transform/) - 분포 변환
 - [`csv-embedding`](./csv-embedding/) - 텍스트 임베딩 생성
+- [`csv-embedding-en`](./csv-embedding-en/) - 텍스트 임베딩 생성 (영어)
 - [`csv-explode`](./csv-explode/) - 다치속성 컬럼 대상 데이터 확장 전개
 - [`csv-from-parquet`](./csv-from-parquet/) - Parquet에서 CSV 변환
+- [`csv-geospatial-analysis`](./csv-geospatial-analysis/) - 지리공간 분석
 - [`csv-get-latlon`](./csv-get-latlon/) - 주소에서 위경도 추출
 - [`csv-join`](./csv-join/) - CSV 파일 조인
+- [`csv-json-string-parser`](./csv-json-string-parser/) - JSON 문자열 파싱
+- [`csv-leap-year-detection`](./csv-leap-year-detection/) - 윤년 감지
 - [`csv-merge`](./csv-merge/) - CSV 파일 병합
+- [`csv-missing-data-interpolation`](./csv-missing-data-interpolation/) - 결측값 보간
+- [`csv-normalization`](./csv-normalization/) - 데이터 정규화
+- [`csv-outlier-detection`](./csv-outlier-detection/) - 이상치 탐지
+- [`csv-query-filtering`](./csv-query-filtering/) - 쿼리 기반 필터링
+- [`csv-random-sampling`](./csv-random-sampling/) - 랜덤 샘플링
+- [`csv-region-clustering`](./csv-region-clustering/) - 지역 클러스터링
 - [`csv-regex`](./csv-regex/) - 정규표현식 처리
+- [`csv-scaling`](./csv-scaling/) - 데이터 스케일링
 - [`csv-sort`](./csv-sort/) - 데이터 정렬
 - [`csv-statistic-summary`](./csv-statistic-summary/) - 통계 요약
+- [`csv-stratified-sampling`](./csv-stratified-sampling/) - 계층 샘플링
+- [`csv-systematic-sampling`](./csv-systematic-sampling/) - 체계적 샘플링
 - [`csv-to-json`](./csv-to-json/) - CSV 데이터를 JSON으로 변환
 - [`csv-tokenize`](./csv-tokenize/) - 텍스트 토큰화 (한국어)
 - [`csv-tokenize-en`](./csv-tokenize-en/) - 텍스트 토큰화 (영어)
 - [`csv-transform`](./csv-transform/) - 데이터 변환
+- [`csv-weekend-holiday-detection`](./csv-weekend-holiday-detection/) - 주말/공휴일 감지
 - [`csv-wordcount`](./csv-wordcount/) - 단어 빈도 계산
 
 ### CSV 기반 시각화
+- [`csv-visualization-3d`](./csv-visualization-3d/) - 3D 시각화
 - [`csv-visualization-barchart`](./csv-visualization-barchart/) - 막대차트 생성
 - [`csv-visualization-boxplot`](./csv-visualization-boxplot/) - 박스플롯 생성
+- [`csv-visualization-heatmap`](./csv-visualization-heatmap/) - 히트맵 생성
 - [`csv-visualization-histogram`](./csv-visualization-histogram/) - 히스토그램 생성
+- [`csv-visualization-linechart`](./csv-visualization-linechart/) - 라인차트 생성
 - [`csv-visualization-map`](./csv-visualization-map/) - 지도 시각화
 - [`csv-visualization-pairplot`](./csv-visualization-pairplot/) - 페어플롯 생성
 - [`csv-visualization-piechart`](./csv-visualization-piechart/) - 파이차트 생성
+- [`csv-visualization-scatter`](./csv-visualization-scatter/) - 산점도 생성
 - [`csv-visualization-wordcloud`](./csv-visualization-wordcloud/) - 워드클라우드 생성
 
 ### JSON 처리
@@ -203,10 +231,6 @@ spec:
 - [`json-to-csv`](./json-to-csv/) - JSON을 CSV로 변환
 - [`json-upload`](./json-upload/) - JSON 파일 업로드
 
-### 데이터베이스 연동
-- [`mysql-to-csv`](./mysql-to-csv/) - MySQL 데이터 추출
-- [`dump-mysql-to-csv`](./dump-mysql-to-csv/) - MySQL 전체 테이블 덤프
-- [`dump-mongodb-to-json`](./dump-mongodb-to-json/) - MongoDB 컬렉션 덤프
 
 ### 실시간 데이터 수집
 - [`mqtt-subscriber`](./mqtt-subscriber/) - MQTT 메시지 구독
