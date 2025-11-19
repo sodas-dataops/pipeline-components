@@ -99,7 +99,7 @@ def generate_report(input_data: pd.DataFrame, output_data: pd.DataFrame,
 """
     return report
 
-def validate_data_type(series: pd.Series, expected_type: str) -> Dict[str, Any]:
+def validate_data_type(series: pd.Series, expected_type: str, datetime_format: str = None) -> Dict[str, Any]:
     """데이터 타입 검증"""
     result = {
         'rule_type': 'data_type',
@@ -110,7 +110,7 @@ def validate_data_type(series: pd.Series, expected_type: str) -> Dict[str, Any]:
     }
     
     if expected_type == 'numeric':
-        result['passed'] = pd.api.types.is_numeric_dtype(series)
+        result['passed'] = bool(pd.api.types.is_numeric_dtype(series))
         
         # pandas 버전 호환성을 위한 numeric 체크
         def is_numeric_value(x):
@@ -123,17 +123,51 @@ def validate_data_type(series: pd.Series, expected_type: str) -> Dict[str, Any]:
             'null_count': series.isnull().sum()
         }
     elif expected_type == 'string':
-        result['passed'] = pd.api.types.is_string_dtype(series) or series.dtype == 'object'
+        result['passed'] = bool(pd.api.types.is_string_dtype(series) or series.dtype == 'object')
         result['details'] = {
             'non_string_count': len(series) - series.apply(lambda x: isinstance(x, str) or pd.isna(x)).sum(),
             'null_count': series.isnull().sum()
         }
     elif expected_type == 'datetime':
-        result['passed'] = pd.api.types.is_datetime64_any_dtype(series)
-        result['details'] = {
-            'non_datetime_count': len(series) - series.apply(lambda x: pd.api.types.is_datetime64_any_dtype(pd.Series([x])) or pd.isna(x)).sum(),
-            'null_count': series.isnull().sum()
-        }
+        # datetime 타입 검증: pd.to_datetime으로 파싱 가능한지 확인
+        if datetime_format:
+            # 특정 format이 주어진 경우 해당 format으로 파싱 시도
+            try:
+                parsed = pd.to_datetime(series, format=datetime_format, errors='coerce')
+                valid_count = parsed.notna().sum()
+                invalid_count = len(series) - valid_count - series.isnull().sum()
+                result['passed'] = bool(invalid_count == 0)
+                result['details'] = {
+                    'datetime_format': datetime_format,
+                    'valid_datetime_count': int(valid_count),
+                    'invalid_datetime_count': int(invalid_count),
+                    'null_count': int(series.isnull().sum())
+                }
+            except Exception as e:
+                result['passed'] = False
+                result['details'] = {
+                    'error': f'Failed to parse datetime with format {datetime_format}: {str(e)}',
+                    'datetime_format': datetime_format,
+                    'null_count': int(series.isnull().sum())
+                }
+        else:
+            # format이 주어지지 않은 경우 일반적인 datetime 파싱 시도
+            try:
+                parsed = pd.to_datetime(series, errors='coerce')
+                valid_count = parsed.notna().sum()
+                invalid_count = len(series) - valid_count - series.isnull().sum()
+                result['passed'] = bool(invalid_count == 0)
+                result['details'] = {
+                    'valid_datetime_count': int(valid_count),
+                    'invalid_datetime_count': int(invalid_count),
+                    'null_count': int(series.isnull().sum())
+                }
+            except Exception as e:
+                result['passed'] = False
+                result['details'] = {
+                    'error': f'Failed to parse datetime: {str(e)}',
+                    'null_count': int(series.isnull().sum())
+                }
     
     return result
 
@@ -216,9 +250,9 @@ def validate_uniqueness(series: pd.Series, unique: bool = True) -> Dict[str, Any
     result['details']['null_count'] = series.isnull().sum()
     
     if unique:
-        result['passed'] = duplicate_count == 0
+        result['passed'] = bool(duplicate_count == 0)
     else:
-        result['passed'] = duplicate_count > 0
+        result['passed'] = bool(duplicate_count > 0)
     
     return result
 
@@ -238,7 +272,7 @@ def validate_completeness(series: pd.Series, min_completeness: float = 0.95) -> 
     result['details']['null_count'] = null_count
     result['details']['total_count'] = total_count
     result['details']['completeness'] = completeness
-    result['passed'] = completeness >= min_completeness
+    result['passed'] = bool(completeness >= min_completeness)
     
     return result
 
@@ -287,7 +321,7 @@ def validate_custom_rule(series: pd.Series, rule: Dict[str, Any]) -> Dict[str, A
             
             passed_count = passed_mask.sum()
             failed_count = (~passed_mask).sum()
-            result['passed'] = (failed_count == 0)
+            result['passed'] = bool(failed_count == 0)
             result['details'] = {
                 'passed_count': int(passed_count),
                 'failed_count': int(failed_count),
@@ -317,7 +351,7 @@ def validate_custom_rule(series: pd.Series, rule: Dict[str, Any]) -> Dict[str, A
             
             passed_count = passed_mask.sum()
             failed_count = (~passed_mask).sum()
-            result['passed'] = (passed_count > 0)
+            result['passed'] = bool(passed_count > 0)
             result['details'] = {
                 'passed_count': int(passed_count),
                 'failed_count': int(failed_count),
@@ -328,7 +362,7 @@ def validate_custom_rule(series: pd.Series, rule: Dict[str, Any]) -> Dict[str, A
         elif condition_type == 'min':
             min_threshold = custom_condition.get('threshold', 0)
             series_min = series.min()
-            result['passed'] = (series_min >= min_threshold)
+            result['passed'] = bool(series_min >= min_threshold)
             result['details'] = {
                 'min_value': float(series_min) if not pd.isna(series_min) else None,
                 'threshold': min_threshold
@@ -337,7 +371,7 @@ def validate_custom_rule(series: pd.Series, rule: Dict[str, Any]) -> Dict[str, A
         elif condition_type == 'max':
             max_threshold = custom_condition.get('threshold', 0)
             series_max = series.max()
-            result['passed'] = (series_max <= max_threshold)
+            result['passed'] = bool(series_max <= max_threshold)
             result['details'] = {
                 'max_value': float(series_max) if not pd.isna(series_max) else None,
                 'threshold': max_threshold
@@ -349,15 +383,15 @@ def validate_custom_rule(series: pd.Series, rule: Dict[str, Any]) -> Dict[str, A
             series_mean = series.mean()
             
             if comparison == 'gt':
-                result['passed'] = (series_mean > mean_threshold)
+                result['passed'] = bool(series_mean > mean_threshold)
             elif comparison == 'gte':
-                result['passed'] = (series_mean >= mean_threshold)
+                result['passed'] = bool(series_mean >= mean_threshold)
             elif comparison == 'lt':
-                result['passed'] = (series_mean < mean_threshold)
+                result['passed'] = bool(series_mean < mean_threshold)
             elif comparison == 'lte':
-                result['passed'] = (series_mean <= mean_threshold)
+                result['passed'] = bool(series_mean <= mean_threshold)
             else:
-                result['passed'] = (series_mean > mean_threshold)
+                result['passed'] = bool(series_mean > mean_threshold)
             
             result['details'] = {
                 'mean_value': float(series_mean) if not pd.isna(series_mean) else None,
@@ -377,7 +411,7 @@ def validate_custom_rule(series: pd.Series, rule: Dict[str, Any]) -> Dict[str, A
             else:
                 ratio = (series.notna().sum() / len(series))
             
-            result['passed'] = (ratio >= min_ratio)
+            result['passed'] = bool(ratio >= min_ratio)
             result['details'] = {
                 'ratio': float(ratio),
                 'min_ratio': min_ratio,
@@ -578,15 +612,15 @@ def validate_statistical(series: pd.Series, check: str, threshold: float, compar
     
     # 비교 연산
     if comparison == 'gt':
-        result['passed'] = stat_value > threshold
+        result['passed'] = bool(stat_value > threshold)
     elif comparison == 'gte':
-        result['passed'] = stat_value >= threshold
+        result['passed'] = bool(stat_value >= threshold)
     elif comparison == 'lt':
-        result['passed'] = stat_value < threshold
+        result['passed'] = bool(stat_value < threshold)
     elif comparison == 'lte':
-        result['passed'] = stat_value <= threshold
+        result['passed'] = bool(stat_value <= threshold)
     elif comparison == 'eq':
-        result['passed'] = abs(stat_value - threshold) < 1e-10
+        result['passed'] = bool(abs(stat_value - threshold) < 1e-10)
     else:
         result['passed'] = False
         result['details'] = {'error': f'Unknown comparison: {comparison}'}
@@ -649,7 +683,7 @@ def validate_cross_column(df: pd.DataFrame, rule: Dict[str, Any]) -> Dict[str, A
             result['details']['failed_count'] = int(failed_count)
             result['details']['total_count'] = int(len(df))
             result['details']['operator'] = operator
-            result['passed'] = (failed_count == 0)
+            result['passed'] = bool(failed_count == 0)
             
         elif comparison_type == 'sum':
             # 합계 검증: col1 + col2 + ... == sum_col
@@ -668,7 +702,7 @@ def validate_cross_column(df: pd.DataFrame, rule: Dict[str, Any]) -> Dict[str, A
             
             result['details']['failed_count'] = int(failed_count)
             result['details']['total_count'] = int(len(df))
-            result['passed'] = (failed_count == 0)
+            result['passed'] = bool(failed_count == 0)
             
         else:
             result['details'] = {'error': f'Unknown comparison type: {comparison_type}'}
@@ -686,53 +720,67 @@ def apply_validation_rule(df: pd.DataFrame, rule: Dict[str, Any]) -> Dict[str, A
     
     # cross_column 타입은 특별 처리
     if rule_type == 'cross_column':
-        return validate_cross_column(df, rule)
+        result = validate_cross_column(df, rule)
+        result['column'] = None  # cross_column은 여러 컬럼을 사용
+        return result
     
     # 다른 타입들은 column이 필요
     if column is None:
         return {
             'rule_type': rule_type,
+            'column': None,
             'passed': False,
             'details': {'error': 'Column not specified'}
         }
     
+    # 컬럼 존재 여부 확인 (엄격한 확인)
     if column not in df.columns:
+        # 컬럼 이름이 정확히 일치하지 않는 경우
+        available_columns = list(df.columns)
         return {
             'rule_type': rule_type,
             'column': column,
             'passed': False,
-            'details': {'error': f'Column "{column}" not found in dataset'}
+            'details': {
+                'error': f'Column "{column}" not found in dataset',
+                'available_columns': available_columns
+            }
         }
     
     series = df[column]
     
+    # 각 검증 함수 호출
     if rule_type == 'data_type':
-        return validate_data_type(series, rule.get('expected_type'))
+        result = validate_data_type(series, rule.get('expected_type'), rule.get('datetime_format'))
     elif rule_type == 'range':
-        return validate_range(series, rule.get('min_value'), rule.get('max_value'))
+        result = validate_range(series, rule.get('min_value'), rule.get('max_value'))
     elif rule_type == 'pattern':
-        return validate_pattern(series, rule.get('pattern'))
+        result = validate_pattern(series, rule.get('pattern'))
     elif rule_type == 'uniqueness':
-        return validate_uniqueness(series, rule.get('unique', True))
+        result = validate_uniqueness(series, rule.get('unique', True))
     elif rule_type == 'completeness':
-        return validate_completeness(series, rule.get('min_completeness', 0.95))
+        result = validate_completeness(series, rule.get('min_completeness', 0.95))
     elif rule_type == 'length':
-        return validate_length(series, rule.get('min_length'), rule.get('max_length'))
+        result = validate_length(series, rule.get('min_length'), rule.get('max_length'))
     elif rule_type == 'allowed_values':
-        return validate_allowed_values(series, rule.get('allowed_values', []))
+        result = validate_allowed_values(series, rule.get('allowed_values', []))
     elif rule_type == 'outlier':
-        return validate_outlier(series, rule.get('method', 'iqr'), rule.get('threshold', 1.5))
+        result = validate_outlier(series, rule.get('method', 'iqr'), rule.get('threshold', 1.5))
     elif rule_type == 'statistical':
-        return validate_statistical(series, rule.get('check'), rule.get('threshold'), rule.get('comparison', 'gte'))
+        result = validate_statistical(series, rule.get('check'), rule.get('threshold'), rule.get('comparison', 'gte'))
     elif rule_type == 'custom':
-        return validate_custom_rule(series, rule)
+        result = validate_custom_rule(series, rule)
     else:
-        return {
+        result = {
             'rule_type': rule_type,
-            'column': column,
             'passed': False,
             'details': {'error': f'Unknown rule type: {rule_type}'}
         }
+    
+    # 결과에 컬럼 정보 추가
+    result['column'] = column
+    
+    return result
 
 def calculate_quality_score(validation_results: List[Dict[str, Any]], validation_rules: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -779,7 +827,15 @@ def calculate_quality_score(validation_results: List[Dict[str, Any]], validation
     
     for i, result in enumerate(validation_results):
         rule_weight = rule_weights[i]['weight']
-        passed = result.get('passed', False)
+        passed_value = result.get('passed', False)
+        
+        # passed 값을 boolean으로 변환
+        if isinstance(passed_value, str):
+            passed = passed_value.lower() in ('true', '1', 'yes', 'on')
+        elif isinstance(passed_value, (int, float)):
+            passed = bool(passed_value)
+        else:
+            passed = bool(passed_value)
         
         if passed:
             achieved_weight += rule_weight
@@ -792,7 +848,7 @@ def calculate_quality_score(validation_results: List[Dict[str, Any]], validation
             'rule_name': rule_weights[i]['rule_name'],
             'rule_type': rule_weights[i]['rule_type'],
             'weight': rule_weight,
-            'passed': passed,
+            'passed': bool(passed),
             'score': rule_weight if passed else 0.0
         })
     
@@ -863,10 +919,25 @@ def solution(input_data: StringIO, output_filename: str, settings: dict = None):
         validation_results = []
         
         for i, rule in enumerate(validation_rules):
-            print(f"- 규칙 {i+1}/{len(validation_rules)}: {rule.get('type', 'unknown')} - {rule.get('column', 'unknown')}")
+            column = rule.get('column', 'unknown')
+            rule_type = rule.get('type', 'unknown')
+            print(f"- 규칙 {i+1}/{len(validation_rules)}: {rule_type} - {column}")
+            
             result = apply_validation_rule(df, rule)
             result['rule_index'] = i
             result['rule'] = rule
+            
+            # 검증 결과 확인 및 로깅
+            passed = result.get('passed', False)
+            if not passed:
+                error_msg = result.get('details', {}).get('error', '')
+                if error_msg:
+                    print(f"  ⚠ 실패: {error_msg}")
+                else:
+                    print(f"  ⚠ 실패: 검증 규칙을 통과하지 못함")
+            else:
+                print(f"  ✓ 통과")
+            
             validation_results.append(result)
         
         print(f"- 검증 완료: {len(validation_results)}개 규칙 처리")
@@ -877,13 +948,25 @@ def solution(input_data: StringIO, output_filename: str, settings: dict = None):
     # 결과 집계
     print(f"\n[3/4] 결과를 집계합니다...")
     
+    # 검증 결과의 passed 값을 boolean으로 보장 (집계 전에 수행)
+    for result in validation_results:
+        if 'passed' in result:
+            # passed 값이 문자열이거나 다른 타입인 경우 boolean으로 변환
+            passed_value = result['passed']
+            if isinstance(passed_value, str):
+                result['passed'] = passed_value.lower() in ('true', '1', 'yes', 'on')
+            elif isinstance(passed_value, (int, float)):
+                result['passed'] = bool(passed_value)
+            else:
+                result['passed'] = bool(passed_value)
+    
     # 품질 점수 계산
     quality_score = calculate_quality_score(validation_results, validation_rules)
     
     summary = {
         'total_rules': len(validation_rules),
-        'passed_rules': sum(1 for r in validation_results if r['passed']),
-        'failed_rules': sum(1 for r in validation_results if not r['passed']),
+        'passed_rules': sum(1 for r in validation_results if r.get('passed', False)),
+        'failed_rules': sum(1 for r in validation_results if not r.get('passed', False)),
         'validation_timestamp': datetime.now().isoformat(),
         'quality_score': quality_score.get('overall_score', 0.0),
         'quality_score_details': quality_score,
@@ -921,10 +1004,27 @@ def solution(input_data: StringIO, output_filename: str, settings: dict = None):
     
     # 결과 저장
     print(f"\n[4/4] 결과를 저장합니다...")
+    
+    def json_default(obj):
+        """JSON 직렬화를 위한 default 함수 - numpy/pandas 타입을 Python 기본 타입으로 변환"""
+        if isinstance(obj, (np.integer, np.int8, np.int16, np.int32, np.int64)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float16, np.float32, np.float64)):
+            return float(obj)
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        elif isinstance(obj, (pd.Timestamp, pd.NaTType)):
+            return str(obj)
+        elif isinstance(obj, pd.Timedelta):
+            return str(obj)
+        elif isinstance(obj, (pd.Series, pd.DataFrame)):
+            return obj.to_dict() if isinstance(obj, pd.Series) else obj.to_dict('records')
+        raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+    
     try:
         if output_format == 'json':
             with open(output_filename, 'w', encoding='utf-8') as f:
-                json.dump(output_data, f, ensure_ascii=False, indent=2, default=str)
+                json.dump(output_data, f, ensure_ascii=False, indent=2, default=json_default)
         else:  # CSV
             output_data.to_csv(output_filename, index=False, encoding='utf-8')
         

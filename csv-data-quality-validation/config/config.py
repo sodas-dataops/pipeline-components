@@ -96,6 +96,14 @@ args =\
                         'comparison': 'gte',
                         'name': 'score_mean',
                         'weight': 1.0
+                    },
+                    {
+                        'column': 'created_at',
+                        'type': 'data_type',
+                        'expected_type': 'datetime',
+                        'datetime_format': '%Y-%m-%d %H:%M:%S',
+                        'name': 'created_at_datetime',
+                        'weight': 1.0
                     }
                 ],
                 'output_format': 'json',
